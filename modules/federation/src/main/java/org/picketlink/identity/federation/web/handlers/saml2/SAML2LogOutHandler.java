@@ -1,23 +1,19 @@
 /*
- * JBoss, Home of Professional Open Source.
- * Copyright 2008, Red Hat Middleware LLC, and individual contributors
- * as indicated by the @author tags. See the copyright.txt file in the
- * distribution for a full listing of individual contributors.
+ * JBoss, Home of Professional Open Source
  *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
+ * Copyright 2013 Red Hat, Inc. and/or its affiliates.
  *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.picketlink.identity.federation.web.handlers.saml2;
 
@@ -27,7 +23,6 @@ import org.picketlink.common.constants.JBossSAMLURIConstants;
 import org.picketlink.common.exceptions.ConfigurationException;
 import org.picketlink.common.exceptions.ParsingException;
 import org.picketlink.common.exceptions.ProcessingException;
-import org.picketlink.common.util.StringUtil;
 import org.picketlink.config.federation.SPType;
 import org.picketlink.identity.federation.api.saml.v2.request.SAML2Request;
 import org.picketlink.identity.federation.api.saml.v2.response.SAML2Response;
@@ -41,12 +36,9 @@ import org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerRe
 import org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerResponse;
 import org.picketlink.identity.federation.core.saml.v2.util.XMLTimeUtil;
 import org.picketlink.identity.federation.core.sts.PicketLinkCoreSTS;
-import org.picketlink.identity.federation.core.wstrust.plugins.saml.SAMLUtil;
 import org.picketlink.identity.federation.saml.v2.SAML2Object;
 import org.picketlink.identity.federation.saml.v2.assertion.AssertionType;
-import org.picketlink.identity.federation.saml.v2.assertion.AuthnStatementType;
 import org.picketlink.identity.federation.saml.v2.assertion.NameIDType;
-import org.picketlink.identity.federation.saml.v2.assertion.StatementAbstractType;
 import org.picketlink.identity.federation.saml.v2.protocol.LogoutRequestType;
 import org.picketlink.identity.federation.saml.v2.protocol.ResponseType;
 import org.picketlink.identity.federation.saml.v2.protocol.StatusCodeType;
@@ -54,18 +46,14 @@ import org.picketlink.identity.federation.saml.v2.protocol.StatusResponseType;
 import org.picketlink.identity.federation.saml.v2.protocol.StatusType;
 import org.picketlink.identity.federation.web.core.HTTPContext;
 import org.picketlink.identity.federation.web.core.IdentityServer;
-import org.picketlink.identity.federation.web.util.RedirectBindingUtil;
-import org.w3c.dom.Document;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * SAML2 LogOut Profile
@@ -80,7 +68,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
     private final SPLogOutHandler sp = new SPLogOutHandler();
 
     /**
-     * @see SAML2Handler#generateSAMLRequest(SAML2HandlerRequest, SAML2HandlerResponse)
+     * @see org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2Handler#generateSAMLRequest(org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerRequest, org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerResponse)
      */
     public void generateSAMLRequest(SAML2HandlerRequest request, SAML2HandlerResponse response) throws ProcessingException {
         if (request.getTypeOfRequestToBeGenerated() == null) {
@@ -97,7 +85,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
     }
 
     /**
-     * @see SAML2Handler#handleRequestType(RequestAbstractType)
+     * @see org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2Handler#handleRequestType(org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerRequest, org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerResponse)
      */
     public void handleRequestType(SAML2HandlerRequest request, SAML2HandlerResponse response) throws ProcessingException {
         if (request.getSAML2Object() instanceof LogoutRequestType == false)
@@ -111,7 +99,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
     }
 
     /**
-     * @see SAML2Handler#handleStatusResponseType(StatusResponseType, Document resultingDocument)
+     * @see org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2Handler#handleStatusResponseType(org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerRequest, org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerResponse)
      */
     public void handleStatusResponseType(SAML2HandlerRequest request, SAML2HandlerResponse response) throws ProcessingException {
         // we do not handle any ResponseType (authentication etc)
@@ -128,8 +116,20 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
         }
     }
 
-    private class IDPLogOutHandler {
+    /**
+     * @param request
+     * @return
+     */
+    Principal getUserPrincipal(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Principal userPrincipal = request.getUserPrincipal();
+        if (userPrincipal ==  null) {
+            userPrincipal = (Principal) session.getAttribute(GeneralConstants.PRINCIPAL_ID);
+        }
+        return userPrincipal;
+    }
 
+    private class IDPLogOutHandler {
         public void generateSAMLRequest(SAML2HandlerRequest request, SAML2HandlerResponse response) throws ProcessingException {
         }
 
@@ -145,13 +145,6 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
 
             String relayState = request.getRelayState();
 
-            String decodedRelayState = relayState;
-            try{
-                decodedRelayState = RedirectBindingUtil.urlDecode(relayState);
-            }catch(IOException ignore){
-                decodedRelayState = relayState;
-            }
-
             ServletContext servletCtx = httpContext.getServletContext();
             IdentityServer server = (IdentityServer) servletCtx.getAttribute("IDENTITY_SERVER");
 
@@ -163,8 +156,8 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             String statusIssuer = statusResponseType.getIssuer().getValue();
             server.stack().deRegisterTransitParticipant(sessionID, statusIssuer);
 
-            String nextParticipant = this.getParticipant(server, sessionID, decodedRelayState);
-            if (nextParticipant == null || nextParticipant.equals(decodedRelayState)) {
+            String nextParticipant = this.getParticipant(server, sessionID, relayState);
+            if (nextParticipant == null || nextParticipant.equals(relayState)) {
                 // we are done with logout - First ask STS to cancel the token
                 AssertionType assertion = (AssertionType) httpSession.getAttribute(GeneralConstants.ASSERTION);
                 if (assertion != null) {
@@ -256,9 +249,8 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
                     // Put the participant in transit mode
                     server.stack().registerTransitParticipant(sessionID, participant);
 
-                    if (relayState == null) {
+                    if (relayState == null)
                         relayState = originalIssuer;
-                    }
 
                     // send logout request to participant with relaystate to orig
                     response.setRelayState(originalIssuer);
@@ -270,18 +262,12 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
 
                     LogoutRequestType lort = saml2Request.createLogoutRequest(request.getIssuer().getValue());
 
-                    Principal userPrincipal = httpServletRequest.getUserPrincipal();
+                    Principal userPrincipal = getUserPrincipal(httpServletRequest);
                     if (userPrincipal == null) {
                         throw logger.samlHandlerPrincipalNotFoundError();
                     }
                     NameIDType nameID = new NameIDType();
                     nameID.setValue(userPrincipal.getName());
-                    //Deal with NameID Format
-                    String nameIDFormat = (String) handlerConfig.getParameter(GeneralConstants.NAMEID_FORMAT);
-                    if(StringUtil.isNullOrEmpty(nameIDFormat)){
-                        nameIDFormat = JBossSAMLURIConstants.NAMEID_FORMAT_PERSISTENT.get();
-                    }
-                    nameID.setFormat(URI.create(nameIDFormat));
                     lort.setNameID(nameID);
 
                     long assertionValidity = PicketLinkCoreSTS.instance().getConfiguration().getIssuedTokenTimeout();
@@ -304,7 +290,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
         }
 
         private void generateSuccessStatusResponseType(String logOutRequestID, SAML2HandlerRequest request,
-                                                       SAML2HandlerResponse response, String originalIssuer) throws ConfigurationException,
+                SAML2HandlerResponse response, String originalIssuer) throws ConfigurationException,
                 ParserConfigurationException, ProcessingException {
 
             logger.trace("Generating Success Status Response for " + originalIssuer);
@@ -322,6 +308,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             statusResponse.setInResponseTo(logOutRequestID);
 
             statusResponse.setIssuer(request.getIssuer());
+            statusResponse.setDestination(originalIssuer);
 
             try {
                 SAML2Response saml2Response = new SAML2Response();
@@ -363,34 +350,21 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
     }
 
     private class SPLogOutHandler {
-
         public void generateSAMLRequest(SAML2HandlerRequest request, SAML2HandlerResponse response) throws ProcessingException {
             // Generate the LogOut Request
             SAML2Request samlRequest = new SAML2Request();
 
             HTTPContext httpContext = (HTTPContext) request.getContext();
             HttpServletRequest httpRequest = httpContext.getRequest();
-            Principal userPrincipal = (Principal) httpRequest.getSession().getAttribute(GeneralConstants.PRINCIPAL_ID);
-
-            if (userPrincipal == null) {
-                userPrincipal = httpRequest.getUserPrincipal();
-            }
-
+            Principal userPrincipal = getUserPrincipal(httpRequest);
             if (userPrincipal == null) {
                 throw logger.samlHandlerPrincipalNotFoundError();
             }
-
             try {
                 LogoutRequestType lot = samlRequest.createLogoutRequest(request.getIssuer().getValue());
 
                 NameIDType nameID = new NameIDType();
                 nameID.setValue(userPrincipal.getName());
-                //Deal with NameID Format
-                String nameIDFormat = (String) handlerConfig.getParameter(GeneralConstants.NAMEID_FORMAT);
-                if(StringUtil.isNullOrEmpty(nameIDFormat)){
-                    nameIDFormat = JBossSAMLURIConstants.NAMEID_FORMAT_PERSISTENT.get();
-                }
-                nameID.setFormat(URI.create(nameIDFormat));
                 lot.setNameID(nameID);
 
                 SPType spConfiguration = (SPType) getProviderconfig();
@@ -402,37 +376,10 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
 
                 lot.setDestination(URI.create(logoutUrl));
 
-                populateSessionIndex(httpRequest, lot);
-
                 response.setResultingDocument(samlRequest.convert(lot));
                 response.setSendRequest(true);
             } catch (Exception e) {
                 throw logger.processingError(e);
-            }
-        }
-
-        private void populateSessionIndex(HttpServletRequest httpRequest, LogoutRequestType lot) throws ProcessingException,
-                ConfigurationException, ParsingException {
-            Document currentAssertion = (Document) httpRequest.getSession().getAttribute(GeneralConstants.ASSERTION_SESSION_ATTRIBUTE_NAME);
-
-            if (currentAssertion != null) {
-                AssertionType assertionType = SAMLUtil.fromElement(currentAssertion.getDocumentElement());
-
-                Set<StatementAbstractType> statements = assertionType.getStatements();
-
-                for (StatementAbstractType statementAbstractType : statements) {
-                    if (AuthnStatementType.class.isInstance(statementAbstractType)) {
-                        AuthnStatementType authnStatement = (AuthnStatementType) statementAbstractType;
-
-                        String sessionIndex = authnStatement.getSessionIndex();
-
-                        if (sessionIndex != null) {
-                            lot.addSessionIndex(sessionIndex);
-                        }
-
-                        break;
-                    }
-                }
             }
         }
 
@@ -464,8 +411,6 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             SAML2Object samlObject = request.getSAML2Object();
             if (samlObject instanceof LogoutRequestType == false)
                 return;
-            //get the configuration to handle a logout request from idp and set the correct response location
-            SPType spConfiguration = (SPType) getProviderconfig();
 
             LogoutRequestType logOutRequest = (LogoutRequestType) samlObject;
             HTTPContext httpContext = (HTTPContext) request.getContext();
@@ -487,7 +432,13 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             // Status
             StatusType statusType = new StatusType();
             StatusCodeType statusCodeType = new StatusCodeType();
-            statusCodeType.setValue(URI.create(JBossSAMLURIConstants.STATUS_SUCCESS.get()));
+            statusCodeType.setValue(URI.create(JBossSAMLURIConstants.STATUS_RESPONDER.get()));
+
+            // 2nd level status code
+            StatusCodeType status2ndLevel = new StatusCodeType();
+            status2ndLevel.setValue(URI.create(JBossSAMLURIConstants.STATUS_SUCCESS.get()));
+            statusCodeType.setStatusCode(status2ndLevel);
+
             statusType.setStatusCode(statusCodeType);
 
             statusResponse.setStatus(statusType);
@@ -496,7 +447,9 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
 
             statusResponse.setIssuer(request.getIssuer());
 
+            SPType spConfiguration = (SPType) getProviderconfig();
             String logoutResponseLocation = spConfiguration.getLogoutResponseLocation();
+
             if (logoutResponseLocation == null) {
                 response.setDestination(logOutRequest.getIssuer().getValue());
             } else {
@@ -513,6 +466,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             }
 
             response.setRelayState(relayState);
+            response.setDestination(logOutRequest.getIssuer().getValue());
             response.setSendRequest(false);
         }
     }
