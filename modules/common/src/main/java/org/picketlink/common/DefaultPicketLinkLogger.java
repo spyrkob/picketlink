@@ -372,7 +372,7 @@ public class DefaultPicketLinkLogger implements PicketLinkLogger {
      */
     @Override
     public ParsingException parserRequiredAttribute(String string) {
-        return new ParsingException(REQD_ATTRIBUTE + "AssertionID");
+        return new ParsingException(REQD_ATTRIBUTE + string);
     }
 
     /*
