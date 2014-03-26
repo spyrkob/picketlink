@@ -78,14 +78,10 @@
     <profile>
       <id>eap6</id>
       <modules>
-          <module>build-config</module>
           <module>modules/common</module>
           <module>modules/config</module>
           <module>modules/idm</module>
           <module>modules/base</module>
-      
-          <module>tests</module>
-      
           <module>modules/federation</module>
       </modules>
     </profile>

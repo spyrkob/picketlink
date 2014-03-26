@@ -17,6 +17,12 @@
   <profiles>
     <profile>
       <id>all</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>release</name>
+        </property>
+      </activation>
       <modules>
         <module>api</module>
         <module>impl</module>
@@ -36,6 +42,11 @@
     </profile>
     <profile>
       <id>release</id>
+      <activation>
+        <property>
+          <name>release</name>
+        </property>
+      </activation>
     </profile>    
   </profiles>
 
