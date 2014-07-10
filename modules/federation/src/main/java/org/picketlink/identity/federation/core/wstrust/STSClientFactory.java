@@ -29,7 +29,51 @@ public final class STSClientFactory {
 
     private static STSClientPool stsClientPool;
 
+    private static final STSClientPool simpleClientPoolFactory = new STSClientPool() {
+
+        @Override
+        public void createPool(STSClientConfig config) {
+        }
+
+        @Override
+        public void createPool(int initialNumberOfClients, STSClientConfig config) {
+        }
+
+        @Override
+        public void createPool(int initialNumberOfClients, STSClientCreationCallBack callBack) {
+        }
+
+        @Override
+        public void destroyPool(STSClientConfig config) {
+        }
+
+        @Override
+        public void destroyPool(String moduleName) {
+        }
+
+        @Override
+        public void returnClient(STSClient stsClient) {
+        }
+
+        @Override
+        public STSClient getClient(STSClientConfig config) {
+            return new STSClient(config);
+        }
+
+        @Override
+        public boolean configExists(STSClientConfig config) {
+            return true;
+        }
+
+    };
+
+
     public static STSClientPool getInstance() {
+        if (stsClientPool == null) {
+            // when stsClientPool is not initialized, just use this simple pool factory which just returns new STSClient
+            // each time getClient method is called
+            return simpleClientPoolFactory;
+        }
         return stsClientPool;
     }
 
@@ -52,6 +96,5 @@ public final class STSClientFactory {
     public STSClient create(final STSClientConfig config) {
         return new STSClient(config);
     }
-
 
 }
