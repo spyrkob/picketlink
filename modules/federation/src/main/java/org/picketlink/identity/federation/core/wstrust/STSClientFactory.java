@@ -92,7 +92,6 @@ public final class STSClientFactory {
      * @param config
      * @return STSClient
      */
-    @Deprecated
     public STSClient create(final STSClientConfig config) {
         return new STSClient(config);
     }
