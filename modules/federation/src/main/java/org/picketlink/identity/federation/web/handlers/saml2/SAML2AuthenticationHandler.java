@@ -216,7 +216,7 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
 
             checkDestination(art.getDestination(), getProviderconfig().getIdentityURL());
 
-            String destination = art.getAssertionConsumerServiceURL().toASCIIString();
+            String destination = art.getSenderURL().toASCIIString();
 
             logger.trace("Destination = " + destination);
 
@@ -278,7 +278,7 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
             if (userPrincipal == null)
                 userPrincipal = httpContext.getRequest().getUserPrincipal();
 
-            String assertionConsumerURL = art.getAssertionConsumerServiceURL().toASCIIString();
+            String assertionConsumerURL = art.getSenderURL().toASCIIString();
             List<String> roles = (List<String>) session.getAttribute(GeneralConstants.ROLES_ID);
             String identityURL = request.getIssuer().getValue();
             Map<String, Object> attribs = (Map<String, Object>) request.getOptions().get(GeneralConstants.ATTRIBUTES);
