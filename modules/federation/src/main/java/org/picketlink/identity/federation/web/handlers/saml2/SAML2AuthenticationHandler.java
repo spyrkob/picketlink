@@ -114,6 +114,8 @@ import static org.picketlink.common.util.StringUtil.isNotNull;
  */
 public class SAML2AuthenticationHandler extends BaseSAML2Handler {
 
+    public static final String SINGLE_ATTRIBUTE_STATEMENT = "SINGLE_ATTRIBUTE_STATEMENT";
+
     private final IDPAuthenticationHandler idp = new IDPAuthenticationHandler();
 
     private final SPAuthenticationHandler sp = new SPAuthenticationHandler();
@@ -153,6 +155,46 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
             sp.generateSAMLRequest(request, response);
             response.setSendRequest(true);
         }
+    }
+
+    /**
+     * <p>This method is invoked during the process of issuing an assertion by the IdP. It returns a list of {@link org.picketlink.identity.federation.saml.v2.assertion.AttributeStatementType}
+     * that are going to be added to the assertion.</p>
+     *
+     * <p>Subclasses may override this method to customize the attributes sent by the IdP to relying parties.</p>
+     *
+     * <p>Before overriden this method, developers must consider using a {@link org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2AttributeManager}.
+     * This method provides more access to the invocation context, which can be access from the given {@link org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerRequest}.</p>
+     *
+     * @param request
+     * @return
+     */
+    protected List<AttributeStatementType> getAttributeStatements(SAML2HandlerRequest request) {
+        List<AttributeStatementType> attributeStatementTypes = new ArrayList<AttributeStatementType>();
+        HttpSession session = BaseSAML2Handler.getHttpSession(request);
+        List<String> roles = (List<String>) session.getAttribute(GeneralConstants.ROLES_ID);
+
+        if (handlerConfig.getParameter(DISABLE_SENDING_ROLES) == null && (roles != null && !roles.isEmpty())) {
+            AttributeStatementType attrStatement = null;
+            if (handlerConfig.getParameter(USE_MULTI_VALUED_ROLES) != null) {
+                attrStatement = StatementUtil.createAttributeStatementForRoles(roles, true);
+            } else {
+                attrStatement = StatementUtil.createAttributeStatement(roles);
+            }
+            if (attrStatement != null) {
+                attributeStatementTypes.add(attrStatement);
+            }
+        }
+
+        Map<String, Object> attribs = (Map<String, Object>) request.getOptions().get(GeneralConstants.ATTRIBUTES);
+
+        // Add in the attributes information
+        if (attribs != null && attribs.size() > 0) {
+            AttributeStatementType attStatement = StatementUtil.createAttributeStatement(attribs);
+            attributeStatementTypes.add(attStatement);
+        }
+
+        return attributeStatementTypes;
     }
 
     private class IDPAuthenticationHandler {
@@ -292,22 +334,21 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
                 assertion.addStatement(authnStatement);
             }
 
-            if (handlerConfig.getParameter(DISABLE_SENDING_ROLES) == null && (roles != null && !roles.isEmpty())) {
-                AttributeStatementType attrStatement = null;
-                if (handlerConfig.getParameter(USE_MULTI_VALUED_ROLES) != null) {
-                    attrStatement = StatementUtil.createAttributeStatementForRoles(roles, true);
-                } else {
-                    attrStatement = StatementUtil.createAttributeStatement(roles);
-                }
-                if (attrStatement != null) {
-                    assertion.addStatement(attrStatement);
-                }
-            }
+            List<AttributeStatementType> attributeStatements = getAttributeStatements(request);
 
-            // Add in the attributes information
-            if (attribs != null && attribs.size() > 0) {
-                AttributeStatementType attStatement = StatementUtil.createAttributeStatement(attribs);
-                assertion.addStatement(attStatement);
+            if (attributeStatements != null) {
+                if (isSingleAttributeStatement()) {
+                    AttributeStatementType singleStatement = new AttributeStatementType();
+
+                    for (AttributeStatementType statement : attributeStatements) {
+                        singleStatement.addAttributes(statement.getAttributes());
+                    }
+                    assertion.addStatement(singleStatement);
+                } else {
+                    for (AttributeStatementType attributeStatementType : attributeStatements) {
+                        assertion.addStatement(attributeStatementType);
+                    }
+                }
             }
 
             // Add assertion to the session
@@ -355,6 +396,10 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
             // Use first endpoint for now (Maybe later we can find logoutType according to bindingType from SAMLRequest)
             EndpointType logoutEndpoint = logoutEndpoints.get(0);
             return logoutEndpoint.getLocation().toASCIIString();
+        }
+
+        private boolean isSingleAttributeStatement() {
+            return handlerConfig.getParameter(SINGLE_ATTRIBUTE_STATEMENT) != null ? Boolean.valueOf(handlerConfig.getParameter(SINGLE_ATTRIBUTE_STATEMENT).toString()) : false;
         }
     }
 

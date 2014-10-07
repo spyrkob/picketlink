@@ -174,8 +174,15 @@ public class BaseWriter {
                 if (attributeValue != null) {
                     if (attributeValue instanceof String) {
                         writeStringAttributeValue((String) attributeValue);
-                    } else
+                    } else if (attributeValue instanceof List<?>) {
+                        List<String> value = (List<String>) attributeValue;
+                        Iterator<String> attrValIterator = value.iterator();
+                        while (attrValIterator.hasNext()) {
+                            writeStringAttributeValue(attrValIterator.next());
+                        }
+                    } else {
                         throw logger.writerUnsupportedAttributeValueError(attributeValue.getClass().getName());
+                    }
                 }
             }
         }
