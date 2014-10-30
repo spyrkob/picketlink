@@ -32,6 +32,7 @@ import org.picketlink.identity.federation.web.core.HTTPContext;
 import org.picketlink.identity.federation.web.util.RedirectBindingSignatureUtil;
 import org.w3c.dom.Document;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.PublicKey;
 import java.util.Map;
 
@@ -83,11 +84,10 @@ public class SAML2SignatureValidationHandler extends AbstractSignatureHandler {
             boolean isValid;
 
             HTTPContext httpContext = (HTTPContext) request.getContext();
-            boolean isPost = httpContext.getRequest().getMethod().equalsIgnoreCase("POST");
 
             logger.trace("HTTP method for validating response: " + httpContext.getRequest().getMethod());
 
-            if (isPost) {
+            if (isPostBinding(httpContext)) {
                 isValid = verifyPostBindingSignature(signedDocument, publicKey);
             } else {
                 isValid = verifyRedirectBindingSignature(httpContext, publicKey);
@@ -155,5 +155,12 @@ public class SAML2SignatureValidationHandler extends AbstractSignatureHandler {
 
     private ProcessingException constructSignatureException() {
         return new ProcessingException(logger.samlHandlerSignatureValidationFailed());
+    }
+
+    private boolean isPostBinding(HTTPContext httpContext) {
+        HttpServletRequest httpServletRequest = httpContext.getRequest();
+        Map<String, String[]> parameterMap = httpServletRequest.getParameterMap();
+
+        return !parameterMap.containsKey(GeneralConstants.SAML_SIGNATURE_REQUEST_KEY);
     }
 }

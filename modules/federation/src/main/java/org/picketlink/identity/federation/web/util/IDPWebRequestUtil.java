@@ -489,4 +489,8 @@ public class IDPWebRequestUtil {
             return this.destinationQueryStringWithSignature;
         }
     }
+
+    public void setRedirectProfile(boolean redirectProfile) {
+        this.redirectProfile = redirectProfile;
+    }
 }

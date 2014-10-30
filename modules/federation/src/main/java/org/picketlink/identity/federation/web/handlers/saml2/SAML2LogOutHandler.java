@@ -46,11 +46,13 @@ import org.picketlink.identity.federation.saml.v2.protocol.StatusResponseType;
 import org.picketlink.identity.federation.saml.v2.protocol.StatusType;
 import org.picketlink.identity.federation.web.core.HTTPContext;
 import org.picketlink.identity.federation.web.core.IdentityServer;
+import org.picketlink.identity.federation.web.util.RedirectBindingUtil;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Map;
@@ -144,6 +146,13 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             HttpSession httpSession = httpRequest.getSession(false);
 
             String relayState = request.getRelayState();
+            String decodedRelayState = relayState;
+
+            try {
+                decodedRelayState = RedirectBindingUtil.urlDecode(relayState);
+            } catch (IOException ignore) {
+                decodedRelayState = relayState;
+            }
 
             ServletContext servletCtx = httpContext.getServletContext();
             IdentityServer server = (IdentityServer) servletCtx.getAttribute("IDENTITY_SERVER");
@@ -156,8 +165,8 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             String statusIssuer = statusResponseType.getIssuer().getValue();
             server.stack().deRegisterTransitParticipant(sessionID, statusIssuer);
 
-            String nextParticipant = this.getParticipant(server, sessionID, relayState);
-            if (nextParticipant == null || nextParticipant.equals(relayState)) {
+            String nextParticipant = this.getParticipant(server, sessionID, decodedRelayState);
+            if (nextParticipant == null || nextParticipant.equals(decodedRelayState)) {
                 // we are done with logout - First ask STS to cancel the token
                 AssertionType assertion = (AssertionType) httpSession.getAttribute(GeneralConstants.ASSERTION);
                 if (assertion != null) {
@@ -171,9 +180,9 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
                 // TODO: check the in transit map for partial logouts
 
                 try {
-                    generateSuccessStatusResponseType(statusResponseType.getInResponseTo(), request, response, relayState);
+                    generateSuccessStatusResponseType(statusResponseType.getInResponseTo(), request, response, decodedRelayState);
 
-                    boolean isPost = isPostBindingForResponse(server, relayState, request);
+                    boolean isPost = isPostBindingForResponse(server, decodedRelayState, request);
                     response.setPostBindingForResponse(isPost);
                 } catch (Exception e) {
                     throw logger.processingError(e);
