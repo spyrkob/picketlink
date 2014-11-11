@@ -1,0 +1,358 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd"
+             version="1.0">
+  <persistence-unit name="jpa-identity-store-tests-pu" transaction-type="RESOURCE_LOCAL">
+    <class>org.picketlink.idm.jpa.model.sample.simple.AttributedTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.AccountTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.RoleTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.GroupTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.IdentityTypeEntity</class>
+    <class>org.picketlink.test.idm.relationship.CustomRelationshipTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.RelationshipTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.RelationshipIdentityTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.PartitionTypeEntity</class>
+    <class>org.picketlink.test.idm.basic.CustomAgentTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.PasswordCredentialTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.DigestCredentialTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.X509CredentialTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.OTPCredentialTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.AttributeTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.TokenCredentialTypeEntity</class>
+    <class>org.picketlink.test.idm.partition.CustomPartitionEntity</class>
+    <class>org.picketlink.test.idm.model.entity.MyCustomAccountEntity</class>
+
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+    <properties>
+      <!-- Hibernate Properties -->
+      <property name="hibernate.connection.url" value="jdbc:h2:mem:test"/>
+      <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+      <property name="hibernate.connection.username" value="sa"/>
+      <property name="hibernate.connection.password" value=""/>
+      <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+
+      <!-- EclipseLink Properties-->
+      <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="javax.persistence.jdbc.user" value="sa"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+      <property name="eclipselink.deploy-on-startup" value="true" />
+      <property name="eclipselink.logging.level" value="INFO" />
+    </properties>
+  </persistence-unit>
+
+  <persistence-unit name="jpa-permission-store-tests-pu" transaction-type="RESOURCE_LOCAL">
+    <class>org.picketlink.idm.jpa.model.sample.simple.AttributedTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.AccountTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.RoleTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.GroupTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.IdentityTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.PartitionTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.PermissionTypeEntity</class>
+    <class>org.picketlink.test.idm.permission.entity.TypedPermissionTypeEntity</class>
+    <class>org.picketlink.test.idm.permission.entity.ProtectedEntity</class>
+    <class>org.picketlink.test.idm.permission.entity.AllowedOperationTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.RelationshipTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.RelationshipIdentityTypeEntity</class>
+
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+    <properties>
+      <!-- Hibernate Properties -->
+        <property name="hibernate.connection.url" value="jdbc:h2:mem:test"/>
+      <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+      <property name="hibernate.connection.username" value="sa"/>
+      <property name="hibernate.connection.password" value=""/>
+      <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+
+        <!-- EclipseLink Properties-->
+        <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="javax.persistence.jdbc.user" value="sa"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+      <property name="eclipselink.deploy-on-startup" value="true" />
+      <property name="eclipselink.logging.level" value="INFO" />
+    </properties>
+  </persistence-unit>
+
+  <persistence-unit name="ldap-usergroup-jpa-role-tests-pu" transaction-type="RESOURCE_LOCAL">
+    <class>org.picketlink.idm.jpa.model.sample.simple.AttributedTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.AccountTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.RoleTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.GroupTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.IdentityTypeEntity</class>
+    <class>org.picketlink.test.idm.relationship.CustomRelationshipTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.RelationshipTypeEntity</class>
+    <class>org.picketlink.test.idm.relationship.RelationshipIdentityTypeReferenceEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.PartitionTypeEntity</class>
+    <class>org.picketlink.test.idm.basic.CustomAgentTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.PasswordCredentialTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.DigestCredentialTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.X509CredentialTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.OTPCredentialTypeEntity</class>
+    <class>org.picketlink.test.idm.basic.AttributeReferenceTypeEntity</class>
+    <class>org.picketlink.test.idm.partition.CustomPartitionEntity</class>
+    <class>org.picketlink.test.idm.model.entity.MyCustomAccountEntity</class>
+
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+    <properties>
+      <!-- Hibernate Properties -->
+      <property name="hibernate.connection.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+      <property name="hibernate.connection.username" value="sa"/>
+      <property name="hibernate.connection.password" value=""/>
+      <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+
+      <!-- EclipseLink Properties-->
+      <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="javax.persistence.jdbc.user" value="sa"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+      <property name="eclipselink.deploy-on-startup" value="true" />
+      <property name="eclipselink.logging.level" value="INFO" />
+    </properties>
+  </persistence-unit>
+
+  <persistence-unit name="ldap-jpa-store-test-pu" transaction-type="RESOURCE_LOCAL">
+    <class>org.picketlink.idm.jpa.model.sample.simple.AttributedTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.RelationshipTypeEntity</class>
+    <class>org.picketlink.test.idm.relationship.RelationshipIdentityTypeReferenceEntity</class>
+    <class>org.picketlink.test.idm.relationship.CustomRelationshipTypeEntity</class>
+    <class>org.picketlink.test.idm.basic.AttributeReferenceTypeEntity</class>
+
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+    <properties>
+      <!-- Hibernate Properties -->
+      <property name="hibernate.connection.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+      <property name="hibernate.connection.username" value="sa"/>
+      <property name="hibernate.connection.password" value=""/>
+      <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+
+      <!-- EclipseLink Properties-->
+      <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="javax.persistence.jdbc.user" value="sa"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+      <property name="eclipselink.deploy-on-startup" value="true" />
+      <property name="eclipselink.logging.level" value="INFO" />
+    </properties>
+  </persistence-unit>
+
+  <persistence-unit name="complex-schema-tests-pu" transaction-type="RESOURCE_LOCAL">
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.Address</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.UserAccount</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.UserAccountControl</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.Employee</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.Customer</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.OrganizationUnitEntity</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.OrganizationUnitAttribute</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.Country</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.ApplicationEntity</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.ApplicationAttribute</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.CompanyEntity</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.Email</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.Person</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.Phone</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.UserAttribute</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.CompanyAttribute</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.RelationshipTypeEntity</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.RelationshipIdentityTypeEntity</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.RelationshipAttribute</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.ApplicationAuthorizationEntity</class>
+    <class>org.picketlink.test.idm.identitymodel.complex.model.entity.IdentityObject</class>
+
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+    <properties>
+      <!-- Hibernate Properties -->
+      <property name="hibernate.connection.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+      <property name="hibernate.connection.username" value="sa"/>
+      <property name="hibernate.connection.password" value=""/>
+      <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+
+      <!-- EclipseLink Properties-->
+      <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="javax.persistence.jdbc.user" value="sa"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+      <property name="eclipselink.deploy-on-startup" value="true" />
+      <property name="eclipselink.logging.level" value="INFO" />
+    </properties>
+  </persistence-unit>
+
+  <persistence-unit name="shanes-test-suite-scenario1-pu" transaction-type="RESOURCE_LOCAL">
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.AccountLogin</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.City</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.ContactType</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.Country</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.EmailType</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.EmployeeContract</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.GroupDetail</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.IdentityObject</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.IdentityObjectAttribute</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.IdentityTextAttribute</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.Partition</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.PartitionAttribute</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.PasswordHash</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.Relationship</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.RelationshipAttribute</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.RelationshipIdentity</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.RoleDetail</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.State</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.StreetType</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.UserAddress</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.UserContact</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.UserDetail</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario1.entity.UserEmail</class>
+
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+    <properties>
+      <!-- Hibernate Properties -->
+      <property name="hibernate.connection.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+      <property name="hibernate.connection.username" value="sa"/>
+      <property name="hibernate.connection.password" value=""/>
+      <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+
+      <!-- EclipseLink Properties-->
+      <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="javax.persistence.jdbc.user" value="sa"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+      <property name="eclipselink.deploy-on-startup" value="true" />
+      <property name="eclipselink.logging.level" value="INFO" />
+    </properties>
+  </persistence-unit>
+  
+  <persistence-unit name="shanes-test-suite-scenario2-pu" transaction-type="RESOURCE_LOCAL">
+    <class>org.picketlink.test.idm.other.shane.model.scenario2.entity.IdentityObject</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario2.entity.IdentityObjectAttribute</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario2.entity.Partition</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario2.entity.PartitionAttribute</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario2.entity.ResourcePermission</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario2.entity.UserDetail</class>
+    <class>org.picketlink.test.idm.other.shane.model.scenario2.entity.Customer</class>
+
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+    <properties>
+      <!-- Hibernate Properties -->
+      <property name="hibernate.connection.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+      <property name="hibernate.connection.username" value="sa"/>
+      <property name="hibernate.connection.password" value=""/>
+      <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+
+      <!-- EclipseLink Properties-->
+      <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="javax.persistence.jdbc.user" value="sa"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+      <property name="eclipselink.deploy-on-startup" value="true" />
+      <property name="eclipselink.logging.level" value="INFO" />
+    </properties>
+  </persistence-unit>
+
+  <persistence-unit name="jpa-identity-store-custom-types-pu" transaction-type="RESOURCE_LOCAL">
+    <class>org.picketlink.idm.jpa.model.sample.simple.AttributedTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.IdentityTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.PartitionTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.AttributeTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.PasswordCredentialTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.X509CredentialTypeEntity</class>
+    <class>org.picketlink.idm.jpa.model.sample.simple.DigestCredentialTypeEntity</class>
+    <class>org.picketlink.test.idm.model.entity.MyCustomAccountEntity</class>
+
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+    <properties>
+      <!-- Hibernate Properties -->
+        <property name="hibernate.connection.url" value="jdbc:h2:mem:test"/>
+      <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+      <property name="hibernate.connection.username" value="sa"/>
+      <property name="hibernate.connection.password" value=""/>
+      <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+      <property name="hibernate.show_sql" value="false"/>
+      <property name="hibernate.format_sql" value="true"/>
+
+        <!-- EclipseLink Properties-->
+        <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:test;MVCC=TRUE"/>
+      <property name="javax.persistence.jdbc.user" value="sa"/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+      <property name="eclipselink.deploy-on-startup" value="true" />
+      <property name="eclipselink.logging.level" value="INFO" />
+    </properties>
+  </persistence-unit>
+
+  <persistence-unit name="picketlink-saas-identity-model-pu">
+
+        <provider>org.hibernate.ejb.HibernatePersistence</provider>
+
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.ApplicationAccessTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.ApplicationTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.ApplicationRealmTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.GrantTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.GroupMembershipTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.GroupTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.RealmTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.RoleTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.UserTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.PasswordCredentialTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.PartitionTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.AbstractIdentityTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.RelationshipTypeEntity</class>
+        <class>org.picketlink.test.idm.identitymodel.saas.model.entity.RelationshipIdentityTypeEntity</class>
+
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <property name="hibernate.connection.driver_class" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:picketlink-saas-identity-model-pu"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			<property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true"/>
+
+            <!-- EclipseLink Properties-->
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:picketlink-saas-identity-model-pu;MVCC=TRUE"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+            <property name="eclipselink.deploy-on-startup" value="true" />
+            <property name="eclipselink.logging.level" value="INFO" />
+        </properties>
+
+	</persistence-unit>
+</persistence>
