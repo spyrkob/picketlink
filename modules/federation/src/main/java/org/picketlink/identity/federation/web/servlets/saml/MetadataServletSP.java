@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.crypto.dsig.DigestMethod;
 import javax.xml.crypto.dsig.SignatureMethod;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -50,6 +51,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.picketlink.common.util.DocumentUtil;
 import org.picketlink.config.federation.AuthPropertyType;
 import org.picketlink.config.federation.KeyProviderType;
 import org.picketlink.config.federation.KeyValueType;
@@ -255,7 +257,19 @@ public class MetadataServletSP extends HttpServlet {
             XMLStreamWriter streamWriter = StaxUtil.getXMLStreamWriter(baos);
             SAMLMetadataWriter writer = new SAMLMetadataWriter(streamWriter);
             writer.writeEntityDescriptor(entityDescriptor);
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(baos.toByteArray()));
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            String feature = "";
+            try {
+                feature = DocumentUtil.feature_disallow_doctype_decl;
+                documentBuilderFactory.setFeature(feature, true);
+                feature = DocumentUtil.feature_external_general_entities;
+                documentBuilderFactory.setFeature(feature, false);
+                feature = DocumentUtil.feature_external_parameter_entities;
+                documentBuilderFactory.setFeature(feature, false);
+            } catch (ParserConfigurationException e) {
+                throw log.parserFeatureNotSupported(feature);
+            }
+            Document doc = documentBuilderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(baos.toByteArray()));
             KeyPair keyPair = new KeyPair(null, keyManager.getSigningKey());
             //Sign doc
             Element spssoDesc = doc.getDocumentElement();
