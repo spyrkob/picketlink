@@ -408,7 +408,7 @@ public class SAML2AuthenticationHandlerUnitTestCase {
         handler.initHandlerConfig(handlerConfig);
 
         // Create a Protocol Context
-        MockServletContext servletContext = createServletContext();
+        MockServletContext servletContext = new MockServletContext();
         MockHttpSession session = new MockHttpSession();
 
         session.setServletContext(servletContext);
