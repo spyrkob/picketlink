@@ -129,6 +129,7 @@ import org.picketlink.identity.federation.web.util.IDPWebRequestUtil;
 import org.picketlink.identity.federation.web.util.SAMLConfigurationProvider;
 import org.w3c.dom.Document;
 
+
 /**
  * A {@link javax.servlet.Filter} that can be configured to convert a
  * JavaEE Web Application to an IDP
@@ -1007,21 +1008,22 @@ public class IDPFilter implements Filter {
      */
     protected void initHandlersChain() {
         try {
-            if (picketLinkConfiguration != null) {
-                this.handlers = picketLinkConfiguration.getHandlers();
-            } else {
+            Handlers handlers = this.picketLinkConfiguration.getHandlers();
+
+            if (handlers == null) {
                 // Get the handlers
                 String handlerConfigFileName = GeneralConstants.HANDLER_CONFIG_FILE_LOCATION;
-                this.handlers = ConfigurationUtil.getHandlers(servletContext.getResourceAsStream(
+                handlers = ConfigurationUtil.getHandlers(servletContext.getResourceAsStream(
                         handlerConfigFileName));
             }
 
             // Get the chain from config
-            String handlerChainClass = this.handlers.getHandlerChainClass();
+            String handlerChainClass = handlers.getHandlerChainClass();
+            SAML2HandlerChain chain;
 
-            if (StringUtil.isNullOrEmpty(handlerChainClass))
+            if (isNullOrEmpty(handlerChainClass)) {
                 chain = SAML2HandlerChainFactory.createChain();
-            else {
+            } else {
                 try {
                     chain = SAML2HandlerChainFactory.createChain(handlerChainClass);
                 } catch (ProcessingException e1) {
@@ -1029,13 +1031,20 @@ public class IDPFilter implements Filter {
                 }
             }
 
-            chain.addAll(HandlerUtil.getHandlers(this.handlers));
+            chain.addAll(HandlerUtil.getHandlers(handlers));
 
             Map<String, Object> chainConfigOptions = new HashMap<String, Object>();
             chainConfigOptions.put(GeneralConstants.ROLE_GENERATOR, roleGenerator);
-            chainConfigOptions.put(GeneralConstants.CONFIGURATION, idpConfiguration);
-            if (this.keyManager != null)
+            chainConfigOptions.put(GeneralConstants.CONFIGURATION, this.idpConfiguration);
+
+            if (keyManager != null) {
                 chainConfigOptions.put(GeneralConstants.KEYPAIR, keyManager.getSigningKeyPair());
+                // If there is a need for X509Data in signedinfo
+                String certificateAlias = (String) keyManager.getAdditionalOption(GeneralConstants.X509CERTIFICATE);
+                if (certificateAlias != null) {
+                    chainConfigOptions.put(GeneralConstants.X509CERTIFICATE, keyManager.getCertificate(certificateAlias));
+                }
+            }
 
             SAML2HandlerChainConfig handlerChainConfig = new DefaultSAML2HandlerChainConfig(chainConfigOptions);
 
@@ -1044,6 +1053,9 @@ public class IDPFilter implements Filter {
             for (SAML2Handler handler : samlHandlers) {
                 handler.initChainConfig(handlerChainConfig);
             }
+
+            this.chain = chain;
+            this.picketLinkConfiguration.setHandlers(handlers);
         } catch (Exception e) {
             logger.samlHandlerConfigurationError(e);
             throw new RuntimeException(e.getLocalizedMessage());
@@ -1051,18 +1063,32 @@ public class IDPFilter implements Filter {
     }
 
     protected void initKeyManager() {
-        if (this.idpConfiguration.isSupportsSignature() || this.idpConfiguration.isEncrypt()) {
-            KeyProviderType keyProvider = this.idpConfiguration.getKeyProvider();
-            if (keyProvider == null)
+        if (idpConfiguration.isSupportsSignature() || idpConfiguration.isEncrypt()) {
+            KeyProviderType keyProvider = idpConfiguration.getKeyProvider();
+            if (keyProvider == null) {
                 throw new RuntimeException(
                         logger.nullValueError("Key Provider is null for context=" + servletContext.getContextPath()));
+            }
+
+            TrustKeyManager keyManager;
 
             try {
-                this.keyManager = CoreConfigUtil.getTrustKeyManager(keyProvider);
+                keyManager = CoreConfigUtil.getTrustKeyManager(keyProvider);
 
                 List<AuthPropertyType> authProperties = CoreConfigUtil.getKeyProviderProperties(keyProvider);
                 keyManager.setAuthProperties(authProperties);
                 keyManager.setValidatingAlias(keyProvider.getValidatingAlias());
+                // Special case when you need X509Data in SignedInfo
+                if (authProperties != null) {
+                    for (AuthPropertyType authPropertyType : authProperties) {
+                        String key = authPropertyType.getKey();
+                        if (GeneralConstants.X509CERTIFICATE.equals(key)) {
+                            // we need X509Certificate in SignedInfo. The value is the alias name
+                            keyManager.addAdditionalOption(GeneralConstants.X509CERTIFICATE, authPropertyType.getValue());
+                            break;
+                        }
+                    }
+                }
             } catch (Exception e) {
                 logger.trustKeyManagerCreationError(e);
                 throw new RuntimeException(e.getLocalizedMessage());
@@ -1073,6 +1099,8 @@ public class IDPFilter implements Filter {
             XMLSignatureUtil.setCanonicalizationMethodType(idpConfiguration.getCanonicalizationMethod());
 
             logger.trace("Key Provider=" + keyProvider.getClassName());
+
+            this.keyManager = keyManager;
         }
     }
 
