@@ -214,6 +214,8 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
             if (art == null)
                 throw logger.samlHandlerAuthnRequestIsNull();
 
+            checkDestination(art.getDestination(), getProviderconfig().getIdentityURL());
+
             String destination = art.getAssertionConsumerServiceURL().toASCIIString();
 
             logger.trace("Destination = " + destination);
@@ -464,6 +466,9 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
                 throws ProcessingException {
             HTTPContext httpContext = (HTTPContext) request.getContext();
             ResponseType responseType = (ResponseType) request.getSAML2Object();
+
+            checkDestination(responseType.getDestination(), getSPConfiguration().getServiceURL());
+
             List<RTChoiceType> assertions = responseType.getAssertions();
             if (assertions.size() == 0)
                 throw logger.samlHandlerNoAssertionFromIDP();
