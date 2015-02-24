@@ -386,7 +386,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
                 String logoutUrl = spConfiguration.getLogoutUrl();
 
                 if (logoutUrl == null) {
-                    logoutUrl = spConfiguration.getIdentityURL();
+                    logoutUrl = getIdentityURL(request);
                 }
 
                 lot.setDestination(URI.create(logoutUrl));
@@ -490,6 +490,19 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             response.setDestination(logOutRequest.getIssuer().getValue());
             response.setSendRequest(false);
         }
+    }
+
+    private String getIdentityURL(SAML2HandlerRequest request) {
+        SPType spConfiguration = getSPConfiguration();
+        HTTPContext httpContext = (HTTPContext) request.getContext();
+        HttpServletRequest httpServletRequest = httpContext.getRequest();
+        String desiredIdP = (String) httpServletRequest.getAttribute(org.picketlink.identity.federation.web.constants.GeneralConstants.DESIRED_IDP);
+
+        if (desiredIdP != null) {
+            return desiredIdP;
+        }
+
+        return spConfiguration.getIdentityURL();
     }
 
     private SPType getSPConfiguration() {
