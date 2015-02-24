@@ -559,6 +559,8 @@ public class SAML2AuthenticationHandlerUnitTestCase {
         audienceRestrictionType.addAudience(URI.create(spType.getServiceURL()));
 
         conditions.addCondition(audienceRestrictionType);
+        conditions.setNotBefore(XMLTimeUtil.getIssueInstant());
+        conditions.setNotOnOrAfter(XMLTimeUtil.add(XMLTimeUtil.getIssueInstant(), 1000));
 
         assertion.setConditions(conditions);
 
@@ -585,6 +587,8 @@ public class SAML2AuthenticationHandlerUnitTestCase {
         audienceRestrictionType.addAudience(URI.create("http://employee.com"));
 
         conditions.addCondition(audienceRestrictionType);
+        conditions.setNotBefore(XMLTimeUtil.getIssueInstant());
+        conditions.setNotOnOrAfter(XMLTimeUtil.add(XMLTimeUtil.getIssueInstant(), 1000));
 
         assertion.setConditions(conditions);
 
