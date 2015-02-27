@@ -1444,7 +1444,7 @@ public class DefaultPicketLinkLogger implements PicketLinkLogger {
      */
     @Override
     public ProcessingException assertionExpiredError(AssertionExpiredException aee) {
-        return new ProcessingException(ErrorCodes.EXPIRED_ASSERTION + "Assertion has expired", aee);
+        return new ProcessingException(new ProcessingException(ErrorCodes.EXPIRED_ASSERTION + "Assertion has expired", aee));
     }
 
     /*
