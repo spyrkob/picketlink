@@ -60,6 +60,10 @@ public class PicketLinkAuditHelper {
         configureAuditManager(securityDomainName);
     }
 
+    public PicketLinkAuditHelper(ServletContext servletContext) throws ConfigurationException {
+        configureAuditManager(getSecurityDomainName(servletContext));
+    }
+
     protected void configureAuditManager(String securityDomainName) throws ConfigurationException {
         try {
             Context context = new InitialContext();

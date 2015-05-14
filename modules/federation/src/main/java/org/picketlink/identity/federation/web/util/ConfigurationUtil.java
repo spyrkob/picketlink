@@ -19,15 +19,25 @@ package org.picketlink.identity.federation.web.util;
 
 import org.picketlink.common.PicketLinkLogger;
 import org.picketlink.common.PicketLinkLoggerFactory;
+import org.picketlink.common.exceptions.ConfigurationException;
 import org.picketlink.common.exceptions.ParsingException;
+import org.picketlink.common.exceptions.ProcessingException;
 import org.picketlink.config.PicketLinkConfigParser;
 import org.picketlink.config.federation.IDPType;
 import org.picketlink.config.federation.PicketLinkType;
 import org.picketlink.config.federation.SPType;
 import org.picketlink.config.federation.handler.Handlers;
 import org.picketlink.config.federation.parsers.SAMLConfigParser;
+import org.picketlink.identity.federation.core.audit.PicketLinkAuditHelper;
+import org.picketlink.identity.federation.web.config.AbstractSAMLConfigurationProvider;
 
+import javax.servlet.ServletContext;
+import java.io.IOException;
 import java.io.InputStream;
+
+import static org.picketlink.common.constants.GeneralConstants.AUDIT_HELPER;
+import static org.picketlink.common.constants.GeneralConstants.CONFIG_FILE_LOCATION;
+import static org.picketlink.common.constants.GeneralConstants.CONFIG_PROVIDER;
 
 /**
  * Deals with Configuration
@@ -92,5 +102,81 @@ public class ConfigurationUtil {
         if (is == null)
             throw logger.nullArgumentError("inputstream");
         return (Handlers) (new SAMLConfigParser()).parse(is);
+    }
+
+    public static PicketLinkType getConfiguration(ServletContext servletContext) throws ProcessingException, ConfigurationException {
+        SAMLConfigurationProvider configurationProvider = getConfigurationProvider(servletContext);
+
+        if (configurationProvider != null) {
+            logger.debug("Loading PicketLink configuration configuration provider [" + configurationProvider + "].");
+            return configurationProvider.getPicketLinkConfiguration();
+        }
+
+        logger.debug("Loading PicketLink configuration from [" + CONFIG_FILE_LOCATION + "].");
+
+        InputStream is = getConfigurationInputStream(servletContext);
+
+        if (is != null) {
+            try {
+                return getConfiguration(is);
+            } catch (ParsingException e) {
+                throw logger.configurationError(e);
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException ignore) {
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static SAMLConfigurationProvider getConfigurationProvider(ServletContext servletContext) {
+        String configProviderType = servletContext.getInitParameter(CONFIG_PROVIDER);
+
+        if (configProviderType != null) {
+            try {
+                SAMLConfigurationProvider configurationProvider = (SAMLConfigurationProvider) SecurityActions
+                        .loadClass(Thread.currentThread().getContextClassLoader(), configProviderType).newInstance();
+
+                if (AbstractSAMLConfigurationProvider.class.isInstance(configurationProvider)) {
+                    InputStream inputStream = getConfigurationInputStream(servletContext);
+
+                    if (inputStream != null) {
+                        ((AbstractSAMLConfigurationProvider) configurationProvider).setConsolidatedConfigFile(inputStream);
+                    }
+                }
+
+                return configurationProvider;
+            } catch (Exception e) {
+                throw new RuntimeException("Could not create config provider [" + configProviderType + "].", e);
+            }
+        }
+
+        return null;
+    }
+
+    public static PicketLinkAuditHelper getAuditHelper(ServletContext servletContext) {
+        String auditHelperType = servletContext.getInitParameter(AUDIT_HELPER);
+
+        if (auditHelperType == null) {
+            auditHelperType = PicketLinkAuditHelper.class.getName();
+        }
+
+        logger.debug("Creating audit helper [" + auditHelperType + "].");
+
+        try {
+            return (PicketLinkAuditHelper) SecurityActions
+                    .loadClass(Thread.currentThread().getContextClassLoader(), auditHelperType)
+                        .getConstructor(ServletContext.class)
+                            .newInstance(servletContext);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not create audit helper [" + auditHelperType + "].", e);
+        }
+    }
+
+    public static InputStream getConfigurationInputStream(ServletContext servletContext) {
+        return servletContext.getResourceAsStream(CONFIG_FILE_LOCATION);
     }
 }
