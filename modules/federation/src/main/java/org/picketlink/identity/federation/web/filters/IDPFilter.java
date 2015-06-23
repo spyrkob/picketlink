@@ -1008,8 +1008,9 @@ public class IDPFilter implements Filter {
      */
     protected void initHandlersChain() {
         try {
-            Handlers handlers = this.picketLinkConfiguration.getHandlers();
-
+            if (picketLinkConfiguration != null) {
+                handlers = picketLinkConfiguration.getHandlers();
+            }
             if (handlers == null) {
                 // Get the handlers
                 String handlerConfigFileName = GeneralConstants.HANDLER_CONFIG_FILE_LOCATION;
@@ -1055,7 +1056,9 @@ public class IDPFilter implements Filter {
             }
 
             this.chain = chain;
-            this.picketLinkConfiguration.setHandlers(handlers);
+            if (picketLinkConfiguration != null) {
+                this.picketLinkConfiguration.setHandlers(handlers);
+            }
         } catch (Exception e) {
             logger.samlHandlerConfigurationError(e);
             throw new RuntimeException(e.getLocalizedMessage());
