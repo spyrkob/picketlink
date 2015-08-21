@@ -240,6 +240,12 @@ public class ProviderType {
             setKeyProvider(keyProvider);
         }
 
+        MetadataProviderType metaDataProvider = other.getMetaDataProvider();
+
+        if (metaDataProvider != null) {
+            setMetaDataProvider(metaDataProvider);
+        }
+
         setSupportsSignature(other.isSupportsSignature());
 
         String can = other.getCanonicalizationMethod();
