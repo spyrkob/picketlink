@@ -4,7 +4,7 @@
 
   <groupId>org.picketlink</groupId>
   <artifactId>picketlink-parent</artifactId>
-  <version>2.5.5.Beta1-SNAPSHOT</version>
+  <version>2.5.5.CR1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>PicketLink Parent</name>
@@ -37,12 +37,12 @@
 
   <properties>
     <!-- Maven Compiler Options -->
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
 
     <!-- Build Options-->
-    <maven.jdk.version>1.7</maven.jdk.version>
-    <maven.version>3.0.4</maven.version>
+    <maven.jdk.version>1.8</maven.jdk.version>
+    <maven.version>3.2.3</maven.version>
 
     <!-- Maven Plugin Versions -->
     <version.enforcer.plugin>1.3.1</version.enforcer.plugin>
@@ -73,7 +73,7 @@
     <junit.version>4.10</junit.version>
     <mockito.version>1.9.0</mockito.version>
   </properties>
- 
+
   <profiles>
     <profile>
       <id>all</id>
@@ -89,9 +89,9 @@
         <module>modules/config</module>
         <module>modules/idm</module>
         <module>modules/base</module>
-      
+
         <module>modules/federation</module>
-      
+
         <!-- module>bom</module -->
       </modules>
     </profile>
@@ -138,9 +138,9 @@
           </plugin>
         </plugins>
       </build>
-    </profile>    
+    </profile>
   </profiles>
-  
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -360,10 +360,10 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.5.1</version>
+          <version>3.3</version>
           <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
+            <source>1.8</source>
+            <target>1.8</target>
           </configuration>
         </plugin>
 
@@ -487,7 +487,7 @@
         </plugin>
       </plugins>
     </pluginManagement>
- 
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
