@@ -17,14 +17,6 @@
  */
 package org.picketlink.identity.federation.web.filters;
 
-import static org.picketlink.common.constants.GeneralConstants.AUDIT_HELPER;
-import static org.picketlink.common.constants.GeneralConstants.CONFIGURATION;
-import static org.picketlink.common.constants.GeneralConstants.CONFIG_PROVIDER;
-import static org.picketlink.common.constants.GeneralConstants.DEPRECATED_CONFIG_FILE_LOCATION;
-import static org.picketlink.common.constants.GeneralConstants.SAML_REQUEST_KEY;
-import static org.picketlink.common.util.StringUtil.isNotNull;
-import static org.picketlink.common.util.StringUtil.isNullOrEmpty;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -46,20 +38,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.jboss.security.audit.AuditLevel;
 import org.picketlink.common.PicketLinkLogger;
 import org.picketlink.common.PicketLinkLoggerFactory;
@@ -134,6 +112,27 @@ import org.picketlink.identity.federation.web.util.RedirectBindingUtil;
 import org.picketlink.identity.federation.web.util.SAMLConfigurationProvider;
 import org.w3c.dom.Document;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import static org.picketlink.common.constants.GeneralConstants.AUDIT_HELPER;
+import static org.picketlink.common.constants.GeneralConstants.CONFIGURATION;
+import static org.picketlink.common.constants.GeneralConstants.CONFIG_PROVIDER;
+import static org.picketlink.common.constants.GeneralConstants.DEPRECATED_CONFIG_FILE_LOCATION;
+import static org.picketlink.common.constants.GeneralConstants.SAML_REQUEST_KEY;
+import static org.picketlink.common.util.StringUtil.isNotNull;
+import static org.picketlink.common.util.StringUtil.isNullOrEmpty;
+
 /**
  * A {@link javax.servlet.Filter} that can be configured to convert a
  * JavaEE Web Application to an IDP
@@ -188,13 +187,13 @@ public class IDPFilter implements Filter {
 
     private Map<String, SPSSODescriptorType> spSSOMetadataMap = new HashMap<String, SPSSODescriptorType>();
     private Handlers handlers;
+    private String characterEncoding;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         servletContext = filterConfig.getServletContext();
         configureConfigurationProvider();
         configureAuditHelper();
-
         startPicketLink();
     }
 
@@ -202,6 +201,10 @@ public class IDPFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+
+        if (this.characterEncoding != null) {
+            request.setCharacterEncoding(this.characterEncoding);
+        }
 
         // Look for unauthorized status
         if (isUnauthorized(httpServletResponse)) {
@@ -1179,8 +1182,16 @@ public class IDPFilter implements Filter {
     protected void startPicketLink() {
         SystemPropertiesUtil.ensure();
 
+        String timerInterval = this.servletContext.getInitParameter(GeneralConstants.REFRESH_CONFIG_TIMER_INTERVAL);
+
+        if (timerInterval != null) {
+            this.timerInterval = Integer.valueOf(timerInterval);
+        }
+
+        this.characterEncoding = this.servletContext.getInitParameter(GeneralConstants.CHARACTER_ENCODING);
+
         //Introduce a timer to reload configuration if desired
-        if(timerInterval > 0 ){
+        if(this.timerInterval > 0 ){
             if(timer == null){
                 timer = new Timer();
             }
@@ -1191,7 +1202,7 @@ public class IDPFilter implements Filter {
                     initKeyManager();
                     initHandlersChain();
                 }
-            }, timerInterval, timerInterval);
+            }, this.timerInterval, this.timerInterval);
         }
 
         this.picketLinkConfiguration = (PicketLinkType) this.servletContext.getAttribute(CONFIGURATION);

@@ -50,7 +50,11 @@ public interface GeneralConstants {
 
     String AUDIT_SECURITY_DOMAIN = "picketlink.audit.securitydomain";
 
+    String CHARACTER_ENCODING = "CHARACTER_ENCODING";
+
     String CONFIGURATION = "CONFIGURATION";
+
+    String CONFIG_FILE = "CONFIG_FILE";
 
     String CONFIG_FILE_LOCATION = "/WEB-INF/picketlink.xml";
 
@@ -83,6 +87,8 @@ public interface GeneralConstants {
     String NAMEID_FORMAT = "NAMEID_FORMAT";
 
     String PRINCIPAL_ID = "picketlink.principal";
+
+    String REFRESH_CONFIG_TIMER_INTERVAL = "REFRESH_CONFIG_TIMER_INTERVAL";
 
     String RELAY_STATE = "RelayState";
 
