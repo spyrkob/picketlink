@@ -17,8 +17,13 @@
  */
 package org.picketlink.identity.federation.web.util;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import org.picketlink.common.PicketLinkLogger;
 import org.picketlink.common.PicketLinkLoggerFactory;
+import org.picketlink.common.constants.GeneralConstants;
 import org.picketlink.common.exceptions.ConfigurationException;
 import org.picketlink.common.exceptions.ParsingException;
 import org.picketlink.common.exceptions.ProcessingException;
@@ -32,12 +37,11 @@ import org.picketlink.identity.federation.core.audit.PicketLinkAuditHelper;
 import org.picketlink.identity.federation.web.config.AbstractSAMLConfigurationProvider;
 
 import javax.servlet.ServletContext;
-import java.io.IOException;
-import java.io.InputStream;
 
 import static org.picketlink.common.constants.GeneralConstants.AUDIT_HELPER;
 import static org.picketlink.common.constants.GeneralConstants.CONFIG_FILE_LOCATION;
 import static org.picketlink.common.constants.GeneralConstants.CONFIG_PROVIDER;
+import static org.picketlink.common.util.StringUtil.isNullOrEmpty;
 
 /**
  * Deals with Configuration
@@ -177,6 +181,16 @@ public class ConfigurationUtil {
     }
 
     public static InputStream getConfigurationInputStream(ServletContext servletContext) {
-        return servletContext.getResourceAsStream(CONFIG_FILE_LOCATION);
+        String configFile = servletContext.getInitParameter(GeneralConstants.CONFIG_FILE);
+
+        if (isNullOrEmpty(configFile)) {
+            return servletContext.getResourceAsStream(CONFIG_FILE_LOCATION);
+        } else {
+            try {
+                return new FileInputStream(configFile);
+            } catch (FileNotFoundException e) {
+                throw logger.samlIDPConfigurationError(e);
+            }
+        }
     }
 }
