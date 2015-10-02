@@ -46,11 +46,11 @@ public interface GeneralConstants {
 
     String AUDIT_ENABLE = "picketlink.audit.enable";
 
-    String AUDIT_HELPER = "AUDIT_HELPER";
+    String AUDIT_HELPER = "org.picketlink.federation.saml.AUDIT_HELPER";
 
     String AUDIT_SECURITY_DOMAIN = "picketlink.audit.securitydomain";
 
-    String CHARACTER_ENCODING = "CHARACTER_ENCODING";
+    String CHARACTER_ENCODING = "org.picketlink.federation.saml.CHARACTER_ENCODING";
 
     String CONFIGURATION = "CONFIGURATION";
 
@@ -58,7 +58,7 @@ public interface GeneralConstants {
 
     String CONFIG_FILE_LOCATION = "/WEB-INF/picketlink.xml";
 
-    String CONFIG_PROVIDER = "CONFIG_PROVIDER";
+    String CONFIG_PROVIDER = "org.picketlink.federation.saml.CONFIG_PROVIDER";
 
     String CONTEXT_PATH = "CONTEXT_PATH";
 
@@ -86,9 +86,11 @@ public interface GeneralConstants {
 
     String NAMEID_FORMAT = "NAMEID_FORMAT";
 
+    String PASS_USER_PRINCIPAL_TO_ATTRIBUTE_MANAGER = "org.picketlink.federation.saml.PASS_USER_PRINCIPAL_TO_ATTRIBUTE_MANAGER";
+
     String PRINCIPAL_ID = "picketlink.principal";
 
-    String REFRESH_CONFIG_TIMER_INTERVAL = "REFRESH_CONFIG_TIMER_INTERVAL";
+    String REFRESH_CONFIG_TIMER_INTERVAL = "org.picketlink.federation.saml.REFRESH_CONFIG_TIMER_INTERVAL";
 
     String RELAY_STATE = "RelayState";
 
