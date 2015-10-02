@@ -188,6 +188,8 @@ public class IDPFilter implements Filter {
     private Map<String, SPSSODescriptorType> spSSOMetadataMap = new HashMap<String, SPSSODescriptorType>();
     private Handlers handlers;
     private String characterEncoding;
+    private boolean passUserPrincipalToAttributeManager;
+
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -516,7 +518,11 @@ public class IDPFilter implements Filter {
                 List<String> roles = roleGenerator.generateRoles(userPrincipal);
                 session.setAttribute(GeneralConstants.ROLES_ID, roles);
 
-                Map<String, Object> attribs = this.attribManager.getAttributes(userPrincipal, attributeKeys);
+                Map<String, Object> attribs = this.attribManager.getAttributes(
+                        passUserPrincipalToAttributeManager == true
+                                ?  request.getUserPrincipal()
+                                : userPrincipal,
+                        attributeKeys);
                 requestOptions.put(GeneralConstants.ATTRIBUTES, attribs);
             }
 
@@ -1189,6 +1195,12 @@ public class IDPFilter implements Filter {
         }
 
         this.characterEncoding = this.servletContext.getInitParameter(GeneralConstants.CHARACTER_ENCODING);
+
+        String passUserPrincipalToAttributeManager = this.servletContext.getInitParameter(GeneralConstants.PASS_USER_PRINCIPAL_TO_ATTRIBUTE_MANAGER);
+
+        if (passUserPrincipalToAttributeManager != null) {
+            this.passUserPrincipalToAttributeManager = Boolean.valueOf(passUserPrincipalToAttributeManager);
+        }
 
         //Introduce a timer to reload configuration if desired
         if(this.timerInterval > 0 ){
