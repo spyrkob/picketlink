@@ -153,6 +153,7 @@ public class IDPFilter implements Filter {
     protected PicketLinkAuditHelper auditHelper = null;
 
     protected IDPType idpConfiguration = null;
+    private final IDPType originalConfiguration;
 
     protected PicketLinkType picketLinkConfiguration = null;
 
@@ -192,6 +193,13 @@ public class IDPFilter implements Filter {
     private String characterEncoding;
     private boolean passUserPrincipalToAttributeManager;
 
+    public IDPFilter() {
+        this(null);
+    }
+
+    public IDPFilter(IDPType idpType) {
+        this.originalConfiguration = idpType;
+    }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -1090,6 +1098,11 @@ public class IDPFilter implements Filter {
 
             // Get the attribute manager
             String attributeManager = idpType.getAttributeManager();
+
+            if (!idpType.hasAttributeManager()) {
+                attributeManager = this.originalConfiguration.getAttributeManager();
+            }
+
             if (attributeManager != null && !"".equals(attributeManager)) {
                 Class<?> clazz = SecurityActions.loadClass(getClass(), attributeManager);
                 if (clazz == null)
@@ -1105,6 +1118,10 @@ public class IDPFilter implements Filter {
 
             // Get the role generator
             String roleGeneratorAttribute = idpType.getRoleGenerator();
+
+            if (!idpType.hasRoleGenerator()) {
+                roleGeneratorAttribute = this.originalConfiguration.getRoleGenerator();
+            }
 
             if (roleGeneratorAttribute != null && !"".equals(roleGeneratorAttribute)) {
                 Class<?> clazz = SecurityActions.loadClass(getClass(), roleGeneratorAttribute);
