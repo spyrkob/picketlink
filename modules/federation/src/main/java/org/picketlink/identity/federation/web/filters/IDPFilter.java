@@ -144,6 +144,8 @@ public class IDPFilter implements Filter {
 
     private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger();
 
+    public static final String SESSION_PARAM_USER_PRINCIPAL= "org.picketlink.federation.saml.idp.USER_PRINCIPAL";
+
     protected ServletContext servletContext;
 
     protected boolean enableAudit = false;
@@ -151,6 +153,7 @@ public class IDPFilter implements Filter {
     protected PicketLinkAuditHelper auditHelper = null;
 
     protected IDPType idpConfiguration = null;
+    private final IDPType originalConfiguration;
 
     protected PicketLinkType picketLinkConfiguration = null;
 
@@ -190,6 +193,13 @@ public class IDPFilter implements Filter {
     private String characterEncoding;
     private boolean passUserPrincipalToAttributeManager;
 
+    public IDPFilter() {
+        this(null);
+    }
+
+    public IDPFilter(IDPType idpType) {
+        this.originalConfiguration = idpType;
+    }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -228,6 +238,26 @@ public class IDPFilter implements Filter {
 
         if (!response.isCommitted()) {
             chain.doFilter(request,response);
+        }
+
+        HttpSession session = httpServletRequest.getSession();
+
+        // here we serve the hosted pages, if necessary.
+        if (!response.isCommitted()) {
+            if ((httpServletRequest.getRequestURI().startsWith(httpServletRequest.getContextPath() + "/index.") && !isUserAuthenticated(session))
+                    || httpServletRequest.getRequestURI().equals(httpServletRequest.getContextPath() + "/")) {
+                forwardHosted(httpServletRequest, httpServletResponse);
+            }
+        }
+
+        configureUserSessionIfNecessary(httpServletRequest);
+    }
+
+    private void configureUserSessionIfNecessary(HttpServletRequest httpServletRequest) {
+        HttpSession session = httpServletRequest.getSession();
+
+        if (!isUserAuthenticated(session)) {
+            session.setAttribute(SESSION_PARAM_USER_PRINCIPAL, httpServletRequest.getUserPrincipal());
         }
     }
 
@@ -290,9 +320,6 @@ public class IDPFilter implements Filter {
                 processSAMLRequestMessage(request, response, null, isGlobalLogout(request));
             } else if (isNotNull(samlResponseMessage)) {
                 processSAMLResponseMessage(request, response);
-            } else if (request.getServletPath().equals(request.getContextPath() + "/")) {
-                // no SAML processing and the request is asking for /.
-                forwardHosted(request, response);
             }
 
             /*HttpSession session = request.getSession();
@@ -335,35 +362,7 @@ public class IDPFilter implements Filter {
         RequestDispatcher dispatch = servletContext
                 .getRequestDispatcher(this.idpConfiguration.getHostedURI());
 
-        try {
-            includeResource(request, response, dispatch);
-        } catch (ClassCastException cce) {
-            throw new IOException(cce);
-            // JBAS5.1 and 6 quirkiness
-            //includeResource(request.getRequest(), response, dispatch);
-        }
-    }
-
-    /**
-     * <p>
-     * Before forwarding we need to know the content length of the target resource in order to configure the response properly.
-     * This is necessary because the valve already have written to the response, and we want to override with the target
-     * resource data.
-     * </p>
-     *
-     * @param request
-     * @param response
-     * @param dispatch
-     * @throws ServletException
-     * @throws IOException
-     */
-    private void includeResource(ServletRequest request, HttpServletResponse response, RequestDispatcher dispatch)
-            throws ServletException, IOException {
-        dispatch.include(request, response);
-
-        // we need to re-configure the content length because Tomcat will truncate the output with the size of the welcome page
-        // (eg.: index.html).
-        //response.setContentLength(response.g.getContentCount());
+        dispatch.forward(request, response);
     }
 
     /**
@@ -1099,6 +1098,11 @@ public class IDPFilter implements Filter {
 
             // Get the attribute manager
             String attributeManager = idpType.getAttributeManager();
+
+            if (!idpType.hasAttributeManager()) {
+                attributeManager = this.originalConfiguration.getAttributeManager();
+            }
+
             if (attributeManager != null && !"".equals(attributeManager)) {
                 Class<?> clazz = SecurityActions.loadClass(getClass(), attributeManager);
                 if (clazz == null)
@@ -1114,6 +1118,10 @@ public class IDPFilter implements Filter {
 
             // Get the role generator
             String roleGeneratorAttribute = idpType.getRoleGenerator();
+
+            if (!idpType.hasRoleGenerator()) {
+                roleGeneratorAttribute = this.originalConfiguration.getRoleGenerator();
+            }
 
             if (roleGeneratorAttribute != null && !"".equals(roleGeneratorAttribute)) {
                 Class<?> clazz = SecurityActions.loadClass(getClass(), roleGeneratorAttribute);
@@ -1494,5 +1502,9 @@ public class IDPFilter implements Filter {
             logger.samlIDPHandlingSAML11Error(e);
             throw new ServletException();
         }
+    }
+
+    private boolean isUserAuthenticated(final HttpSession session) {
+        return session.getAttribute(SESSION_PARAM_USER_PRINCIPAL) != null;
     }
 }
