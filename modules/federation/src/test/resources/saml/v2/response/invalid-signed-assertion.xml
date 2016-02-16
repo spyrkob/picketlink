@@ -1,0 +1,51 @@
+<saml:Assertion xmlns="urn:oasis:names:tc:SAML:2.0:assertion" ID="ID_58c91f56-5e73-4918-b188-2a84385a57a6"
+                IssueInstant="2016-02-10T16:40:26.779Z" Version="2.0"
+                xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+    <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://localhost:8080/idp/</saml:Issuer>
+    <dsig:Signature xmlns:dsig="http://www.w3.org/2000/09/xmldsig#">
+        <dsig:SignedInfo>
+            <dsig:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#WithComments"/>
+            <dsig:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+            <dsig:Reference URI="#ID_58c91f56-5e73-4918-b188-2a84385a57a6">
+                <dsig:Transforms>
+                    <dsig:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                    <dsig:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                </dsig:Transforms>
+                <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+                <dsig:DigestValue>8+nYLe8y7qMvoP3cWF2zxpp4++M=</dsig:DigestValue>
+            </dsig:Reference>
+        </dsig:SignedInfo>
+        <dsig:SignatureValue>
+            EWVXLdP8onZ8O1UmV1x33AUkdYZR/bucRvD3lf0jh6zy3JzsQJjRlMVr1sRkULHDDnB8DAth0edjsjcJDPFU51Fu4Nu+5bms4/xtgA2MgD/mOo1kmzNUWmNBR2ZZGE5fo/b8E+RTCbnfwxt24MA3jGjiA5tXJ0ZkIONteeFZGEY=
+        </dsig:SignatureValue>
+        <dsig:KeyInfo>
+            <dsig:KeyValue>
+                <dsig:RSAKeyValue>
+                    <dsig:Modulus>
+                        lHY3TV525DoJ9BzGjsySs657PmUfp4MON/oDoa6z6dd3wAD7NZbV4TFqdix0nchz5NntzjoEscSGIiP//Ab8dtBqF9J6no8vR5fxo9+aRLUkM59BsLTGAC9ZuoTad9VwZKAIV2mL0+lCeHod1+oprGlPiuG7iSZb5wgWLdH7ujk=
+                    </dsig:Modulus>
+                    <dsig:Exponent>AQAB</dsig:Exponent>
+                </dsig:RSAKeyValue>
+            </dsig:KeyValue>
+        </dsig:KeyInfo>
+    </dsig:Signature>
+    <saml:Subject>
+        <saml:NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
+                     xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">testuser
+        </saml:NameID>
+        <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+            <saml:SubjectConfirmationData InResponseTo="ID_a7fb9abc-01f3-407e-b604-d1e2a4f23cdf"
+                                          NotOnOrAfter="2016-02-10T16:40:35.979Z" Recipient="http://sp"/>
+        </saml:SubjectConfirmation>
+    </saml:Subject>
+    <saml:Conditions NotBefore="2016-02-10T16:40:24.779Z" NotOnOrAfter="2016-02-10T16:40:35.979Z">
+        <saml:AudienceRestriction>
+            <saml:Audience>http://sp</saml:Audience>
+        </saml:AudienceRestriction>
+    </saml:Conditions>
+    <saml:AuthnStatement AuthnInstant="2016-02-10T16:40:26.786Z" SessionIndex="ID_58c91f56-5e73-4918-b188-2a84385a57a6">
+        <saml:AuthnContext>
+            <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>
+        </saml:AuthnContext>
+    </saml:AuthnStatement>
+</saml:Assertion>
