@@ -37,6 +37,8 @@ import org.picketlink.idm.spi.IdentityContext;
 import org.picketlink.idm.spi.IdentityStore;
 import org.picketlink.idm.spi.StoreSelector;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -164,7 +166,7 @@ public class DefaultRelationshipQuery<T extends Relationship> implements Relatio
             Class<? extends IdentityType> identityTypeClass;
 
             try {
-                identityTypeClass = classForName(type, reference.getRelationship().getClass().getClassLoader());
+                identityTypeClass = classForName(type, getClassLoader(reference.getRelationship().getClass()));
             } catch (ClassNotFoundException e) {
                 throw new IdentityManagementException("Could not instantiate referenced identity type [" + type + "].", e);
             }
@@ -185,6 +187,19 @@ public class DefaultRelationshipQuery<T extends Relationship> implements Relatio
                     .getSingleResult();
 
             property.setValue(relationship, identityType);
+        }
+    }
+
+    private static ClassLoader getClassLoader(final Class<?> clazz) {
+        if (System.getSecurityManager() != null) {
+            return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+                @Override
+                public ClassLoader run() {
+                    return clazz.getClassLoader();
+                }
+            });
+        } else {
+            return clazz.getClassLoader();
         }
     }
 

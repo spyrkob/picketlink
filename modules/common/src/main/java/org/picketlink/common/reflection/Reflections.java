@@ -305,9 +305,10 @@ public class Reflections {
      * @throws ClassNotFoundException if the class cannot be found
      */
     public static <T> Class<T> classForName(String name, ClassLoader... loaders) throws ClassNotFoundException {
+        final ClassLoader tccl = SecurityActions.getTCCL();
         try {
-            if (Thread.currentThread().getContextClassLoader() != null) {
-                return (Class<T>) Class.forName(name, true, Thread.currentThread().getContextClassLoader());
+            if (tccl != null) {
+                return (Class<T>) Class.forName(name, true, tccl);
             } else {
                 return (Class<T>) Class.forName(name);
             }
@@ -320,9 +321,9 @@ public class Reflections {
                 }
             }
         }
-        if (Thread.currentThread().getContextClassLoader() != null) {
+        if (tccl != null) {
             throw new ClassNotFoundException("Could not load class " + name +
-                    " with the context class loader " + Thread.currentThread().getContextClassLoader().toString() +
+                    " with the context class loader " + tccl.toString() +
                     " or any of the additional ClassLoaders: " + Arrays.toString(loaders));
         } else {
             throw new ClassNotFoundException("Could not load class " + name +
@@ -1131,10 +1132,10 @@ public class Reflections {
      * @throws InstantiationException
      */
     public static <T> T newInstance(final Class<?> type, final String fullQualifiedName) throws ClassNotFoundException, InstantiationException {
-        Class<Object> instanceType = classForName(fullQualifiedName, type.getClassLoader());
+        Class<Object> instanceType = classForName(fullQualifiedName, SecurityActions.getClassLoader(type));
 
         try {
-            Constructor<Object> defaultConstructor = instanceType.getDeclaredConstructor();
+            Constructor<Object> defaultConstructor = SecurityActions.getDeclaredConstructor(instanceType);
 
             if (!Modifier.isPublic(defaultConstructor.getModifiers())) {
                 defaultConstructor.setAccessible(true);

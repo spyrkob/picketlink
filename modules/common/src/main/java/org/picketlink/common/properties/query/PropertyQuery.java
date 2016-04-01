@@ -183,7 +183,7 @@ public class PropertyQuery<V> {
         Class<?> cls = targetClass;
         while (cls != null && !cls.equals(Object.class)) {
             // Now check declared fields
-            for (Field field : cls.getDeclaredFields()) {
+            for (Field field : SecurityActions.getDeclaredFields(cls)) {
                 boolean match = true;
                 for (PropertyCriteria c : criteria) {
                     if (!c.fieldMatches(field)) {

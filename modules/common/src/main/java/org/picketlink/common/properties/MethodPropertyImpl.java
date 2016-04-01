@@ -164,7 +164,7 @@ class MethodPropertyImpl<V> implements MethodProperty<V> {
     }
 
     private static Method getGetterMethod(Class<?> clazz, String name) {
-        for (Method method : clazz.getDeclaredMethods()) {
+        for (Method method : SecurityActions.getDeclaredMethods(clazz)) {
             String methodName = method.getName();
             if (method.getParameterTypes().length == 0) {
                 if (methodName.startsWith(GETTER_METHOD_PREFIX)) {
