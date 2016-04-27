@@ -72,6 +72,7 @@ import org.picketlink.identity.federation.saml.v2.protocol.ResponseType;
 import org.picketlink.identity.federation.saml.v2.protocol.ResponseType.RTChoiceType;
 import org.picketlink.identity.federation.saml.v2.protocol.StatusType;
 import org.picketlink.identity.federation.web.core.HTTPContext;
+import org.picketlink.identity.federation.web.core.IdentityParticipantStack;
 import org.picketlink.identity.federation.web.core.IdentityServer;
 import org.picketlink.identity.federation.web.interfaces.IRoleValidator;
 import org.w3c.dom.Document;
@@ -242,7 +243,7 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
 
                 // Update the Identity Server
                 boolean isPost = art.getProtocolBinding().toString().equals(JBossSAMLURIConstants.SAML_HTTP_POST_BINDING.get());
-                IdentityServer identityServer = (IdentityServer) servletContext.getAttribute(GeneralConstants.IDENTITY_SERVER);
+                IdentityParticipantStack stack = getIdentityParticipantStack(servletContext, session);
                 // We will try to find URL for global logout from SP metadata (if they are provided) and use SP logout URL
                 // for registration to IdentityServer
                 String participantLogoutURL = getParticipantURL(destination, request);
@@ -252,7 +253,7 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
 
                 // If URL is null, participant doesn't support global logout
                 if (participantLogoutURL != null) {
-                    identityServer.stack().register(session.getId(), participantLogoutURL, isPost);
+                    stack.register(session.getId(), participantLogoutURL, isPost);
                 }
 
                 // Check whether we use POST binding for response
@@ -403,6 +404,23 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
 
         private boolean isSingleAttributeStatement() {
             return handlerConfig.getParameter(SINGLE_ATTRIBUTE_STATEMENT) != null ? Boolean.valueOf(handlerConfig.getParameter(SINGLE_ATTRIBUTE_STATEMENT).toString()) : false;
+        }
+
+        private IdentityParticipantStack getIdentityParticipantStack(ServletContext servletContext, HttpSession session) throws ProcessingException {
+            IdentityServer identityServer = (IdentityServer) servletContext.getAttribute(GeneralConstants.IDENTITY_SERVER);
+
+            if (identityServer == null) {
+                throw logger.samlHandlerIdentityServerNotFoundError();
+            }
+
+            IdentityParticipantStack stack = (IdentityParticipantStack) session.getAttribute(IdentityParticipantStack.class.getName());
+
+            if (stack == null) {
+                stack = identityServer.stack();
+                session.setAttribute(IdentityParticipantStack.class.getName(), stack);
+            }
+
+            return stack;
         }
     }
 
