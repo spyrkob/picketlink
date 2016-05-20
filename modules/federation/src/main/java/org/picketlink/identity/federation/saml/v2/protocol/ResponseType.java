@@ -68,6 +68,10 @@ public class ResponseType extends StatusResponseType {
         assertions.add(choice);
     }
 
+    public void addAssertion(int index, RTChoiceType choice) {
+        assertions.add(index, choice);
+    }
+
     /**
      * Remove an assertion
      *

@@ -19,6 +19,7 @@ package org.picketlink.identity.federation.core.util;
 
 import org.picketlink.common.PicketLinkLogger;
 import org.picketlink.common.PicketLinkLoggerFactory;
+import org.picketlink.common.constants.JBossSAMLConstants;
 import org.picketlink.common.constants.JBossSAMLURIConstants;
 import org.picketlink.common.constants.WSTrustConstants;
 import org.picketlink.common.exceptions.ParsingException;
@@ -500,9 +501,18 @@ public class XMLSignatureUtil {
 
         if (publicKey == null)
             throw logger.nullValueError("Public Key");
-
+        int signedAssertions = 0;
+        String assertionNameSpaceUri = null;
         for (int i = 0; i < nl.getLength(); i++) {
-            DOMValidateContext valContext = new DOMValidateContext(publicKey, nl.item(i));
+            Node signatureNode = nl.item(i);
+            Node parent = signatureNode.getParentNode();
+            if (parent != null && JBossSAMLConstants.ASSERTION.get().equals(parent.getLocalName())) {
+                ++signedAssertions;
+                if (assertionNameSpaceUri == null) {
+                    assertionNameSpaceUri = parent.getNamespaceURI();
+                }
+            }
+            DOMValidateContext valContext = new DOMValidateContext(publicKey, signatureNode);
             XMLSignature signature = fac.unmarshalXMLSignature(valContext);
 
             boolean coreValidity = signature.validate(valContext);
@@ -521,7 +531,11 @@ public class XMLSignatureUtil {
                 return false;
             }
         }
-
+        NodeList assertions = signedDoc.getElementsByTagNameNS(assertionNameSpaceUri, JBossSAMLConstants.ASSERTION.get());
+        if (signedAssertions > 0 && assertions != null && assertions.getLength() != signedAssertions) {
+            // there are unsigned assertions mixed with signed ones
+            return false;
+        }
         return true;
     }
 
