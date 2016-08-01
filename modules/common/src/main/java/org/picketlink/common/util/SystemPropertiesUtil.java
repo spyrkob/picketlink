@@ -19,6 +19,8 @@ package org.picketlink.common.util;
 
 import javax.xml.XMLConstants;
 
+import org.picketlink.common.constants.GeneralConstants;
+
 /**
  * Utility dealing with the system properties at the JVM level for PicketLink
  *
@@ -44,6 +46,12 @@ public class SystemPropertiesUtil {
         if (StringUtil.isNullOrEmpty(SecurityActions.getSystemProperty(xacmlValidation, ""))) {
             SecurityActions.setSystemProperty(xacmlValidation, "false");
         }
+
+        // sets TCCL JAXP default to true
+        if (StringUtil.isNullOrEmpty(SecurityActions.getSystemProperty(GeneralConstants.TCCL_JAXP, ""))) {
+            SecurityActions.setSystemProperty(GeneralConstants.TCCL_JAXP, "true");
+        }
+
     };
 
     /**
