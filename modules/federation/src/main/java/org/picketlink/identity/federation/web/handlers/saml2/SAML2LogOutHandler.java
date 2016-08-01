@@ -36,9 +36,12 @@ import org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerRe
 import org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2HandlerResponse;
 import org.picketlink.identity.federation.core.saml.v2.util.XMLTimeUtil;
 import org.picketlink.identity.federation.core.sts.PicketLinkCoreSTS;
+import org.picketlink.identity.federation.core.wstrust.plugins.saml.SAMLUtil;
 import org.picketlink.identity.federation.saml.v2.SAML2Object;
 import org.picketlink.identity.federation.saml.v2.assertion.AssertionType;
+import org.picketlink.identity.federation.saml.v2.assertion.AuthnStatementType;
 import org.picketlink.identity.federation.saml.v2.assertion.NameIDType;
+import org.picketlink.identity.federation.saml.v2.assertion.StatementAbstractType;
 import org.picketlink.identity.federation.saml.v2.protocol.LogoutRequestType;
 import org.picketlink.identity.federation.saml.v2.protocol.ResponseType;
 import org.picketlink.identity.federation.saml.v2.protocol.StatusCodeType;
@@ -47,6 +50,7 @@ import org.picketlink.identity.federation.saml.v2.protocol.StatusType;
 import org.picketlink.identity.federation.web.core.HTTPContext;
 import org.picketlink.identity.federation.web.core.IdentityServer;
 import org.picketlink.identity.federation.web.util.RedirectBindingUtil;
+import org.w3c.dom.Document;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -56,6 +60,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * SAML2 LogOut Profile
@@ -391,10 +396,37 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
 
                 lot.setDestination(URI.create(logoutUrl));
 
+                populateSessionIndex(httpRequest, lot);
+
                 response.setResultingDocument(samlRequest.convert(lot));
                 response.setSendRequest(true);
             } catch (Exception e) {
                 throw logger.processingError(e);
+            }
+        }
+
+        private void populateSessionIndex(HttpServletRequest httpRequest, LogoutRequestType lot) throws ProcessingException,
+                ConfigurationException, ParsingException {
+            Document currentAssertion = (Document) httpRequest.getSession().getAttribute(GeneralConstants.ASSERTION_SESSION_ATTRIBUTE_NAME);
+
+            if (currentAssertion != null) {
+                AssertionType assertionType = SAMLUtil.fromElement(currentAssertion.getDocumentElement());
+
+                Set<StatementAbstractType> statements = assertionType.getStatements();
+
+                for (StatementAbstractType statementAbstractType : statements) {
+                    if (AuthnStatementType.class.isInstance(statementAbstractType)) {
+                        AuthnStatementType authnStatement = (AuthnStatementType) statementAbstractType;
+
+                        String sessionIndex = authnStatement.getSessionIndex();
+
+                        if (sessionIndex != null) {
+                            lot.addSessionIndex(sessionIndex);
+                        }
+
+                        break;
+                    }
+                }
             }
         }
 
