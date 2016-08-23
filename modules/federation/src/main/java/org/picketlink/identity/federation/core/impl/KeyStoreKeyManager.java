@@ -294,9 +294,19 @@ public class KeyStoreKeyManager implements TrustKeyManager {
         if (this.keyStorePass == null) {
             this.keyStorePass = SecurityActions.getProperty("javax.net.ssl.keyStorePassword", null);
         }
-
         InputStream is = this.getKeyStoreInputStream(this.keyStoreURL);
-        ks = KeyStoreUtil.getKeyStore(is, keyStorePass.toCharArray());
+        try {
+            ks = KeyStoreUtil.getKeyStore(is, keyStorePass.toCharArray());
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (Exception e) {
+                logger.exceptionWhenClosingKeyStoreInputStreamWarning(e);
+            }
+        }
+
     }
 
     /**

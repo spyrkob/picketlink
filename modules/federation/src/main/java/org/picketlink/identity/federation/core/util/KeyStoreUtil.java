@@ -58,7 +58,14 @@ public class KeyStoreUtil {
      */
     public static KeyStore getKeyStore(File keyStoreFile, char[] storePass) throws GeneralSecurityException, IOException {
         FileInputStream fis = new FileInputStream(keyStoreFile);
-        return getKeyStore(fis, storePass);
+        KeyStore keyStore = null;
+        try {
+            keyStore = getKeyStore(fis, storePass);
+        } finally {
+            safeClose(fis);
+        }
+
+        return keyStore;
     }
 
     /**
@@ -76,9 +83,16 @@ public class KeyStoreUtil {
         if (fileURL == null)
             throw logger.nullArgumentError("fileURL");
 
+        KeyStore keyStore = null;
         File file = new File(fileURL);
         FileInputStream fis = new FileInputStream(file);
-        return getKeyStore(fis, storePass);
+        try {
+            keyStore = getKeyStore(fis, storePass);
+        } finally {
+            safeClose(fis);
+        }
+
+        return keyStore;
     }
 
     /**
@@ -96,7 +110,16 @@ public class KeyStoreUtil {
         if (url == null)
             throw logger.nullArgumentError("url");
 
-        return getKeyStore(url.openStream(), storePass);
+        KeyStore keyStore = null;
+        InputStream inputStream = url.openStream();
+        try {
+            keyStore = getKeyStore(inputStream, storePass);
+        } finally {
+            safeClose(inputStream);
+        }
+
+        return keyStore;
+
     }
 
     /**
@@ -187,5 +210,16 @@ public class KeyStoreUtil {
         FileOutputStream out = new FileOutputStream(keystoreFile);
         keystore.store(out, storePass);
         out.close();
+    }
+    
+    private static void safeClose(InputStream inputStream){
+       try{
+          if (inputStream != null){
+             inputStream.close();
+          }
+       }
+       catch (Exception e){
+          logger.exceptionWhenClosingKeyStoreInputStreamWarning(e);
+       }
     }
 }

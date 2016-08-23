@@ -1220,4 +1220,11 @@ public interface PicketLinkLogger {
     RuntimeException parserFeatureNotSupported(String feature);
 
     ProcessingException samlAssertionWrongAudience(String serviceURL);
+
+    /**
+     * Log exception raised when key closing store input stream
+     *
+     * @param t
+     */
+    void exceptionWhenClosingKeyStoreInputStreamWarning(Throwable t);
 }
