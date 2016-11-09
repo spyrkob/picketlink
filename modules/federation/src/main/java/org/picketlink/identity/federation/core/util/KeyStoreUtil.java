@@ -211,7 +211,7 @@ public class KeyStoreUtil {
         keystore.store(out, storePass);
         out.close();
     }
-    
+
     private static void safeClose(InputStream inputStream){
        try{
           if (inputStream != null){
