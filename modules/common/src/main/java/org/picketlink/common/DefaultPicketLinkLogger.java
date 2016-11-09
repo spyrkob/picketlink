@@ -2388,4 +2388,15 @@ public class DefaultPicketLinkLogger implements PicketLinkLogger {
         return new ProcessingException("Wrong audience [" + serviceURL + "].");
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.picketlink.identity.federation.PicketLinkLogger#exceptionWhenClosingKeyStoreInputStreamWarning(java.lang.Exception)
+     */
+    @Override
+    public void exceptionWhenClosingKeyStoreInputStreamWarning(Throwable t) {
+        logger.warn("Unable to close keystore input stream", t);
+    }
+
 }
