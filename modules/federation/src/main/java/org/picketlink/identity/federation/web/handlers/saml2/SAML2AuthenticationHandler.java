@@ -432,6 +432,8 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
                 String bindingType = getSPConfiguration().getBindingType();
                 boolean isIdpUsesPostBinding = getSPConfiguration().isIdpUsesPostBinding();
 
+                response.setRelayState(getSPConfiguration().getRelayState());
+
                 if (bindingType != null) {
                     if (bindingType.equals("POST") || isIdpUsesPostBinding) {
                         authn.setProtocolBinding(URI.create(JBossSAMLURIConstants.SAML_HTTP_POST_BINDING.get()));
