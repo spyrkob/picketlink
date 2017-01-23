@@ -519,7 +519,6 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             }
 
             response.setRelayState(relayState);
-            response.setDestination(logOutRequest.getIssuer().getValue());
             response.setSendRequest(false);
         }
     }
