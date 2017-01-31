@@ -56,6 +56,8 @@ public class IdentityServer implements HttpSessionListener {
 
     public static class STACK implements IdentityParticipantStack {
 
+        private static final long serialVersionUID = 2843967021465684134L;
+
         private final ConcurrentHashMap<String, Stack<String>> sessionParticipantsMap = new ConcurrentHashMap<String, Stack<String>>();
 
         private final ConcurrentHashMap<String, Set<String>> inTransitMap = new ConcurrentHashMap<String, Set<String>>();

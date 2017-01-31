@@ -48,6 +48,7 @@ import org.picketlink.identity.federation.saml.v2.protocol.StatusCodeType;
 import org.picketlink.identity.federation.saml.v2.protocol.StatusResponseType;
 import org.picketlink.identity.federation.saml.v2.protocol.StatusType;
 import org.picketlink.identity.federation.web.core.HTTPContext;
+import org.picketlink.identity.federation.web.core.IdentityParticipantStack;
 import org.picketlink.identity.federation.web.core.IdentityServer;
 import org.picketlink.identity.federation.web.util.RedirectBindingUtil;
 import org.w3c.dom.Document;
@@ -163,17 +164,13 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             }
 
             ServletContext servletCtx = httpContext.getServletContext();
-            IdentityServer server = (IdentityServer) servletCtx.getAttribute("IDENTITY_SERVER");
-
-            if (server == null)
-                throw logger.samlHandlerIdentityServerNotFoundError();
-
+            IdentityParticipantStack stack = getIdentityParticipantStack(servletCtx, httpSession);
             String sessionID = httpSession.getId();
 
             String statusIssuer = statusResponseType.getIssuer().getValue();
-            server.stack().deRegisterTransitParticipant(sessionID, statusIssuer);
+            stack.deRegisterTransitParticipant(sessionID, statusIssuer);
 
-            String nextParticipant = this.getParticipant(server, sessionID, decodedRelayState);
+            String nextParticipant = this.getParticipant(stack, sessionID, decodedRelayState);
             if (nextParticipant == null || nextParticipant.equals(decodedRelayState)) {
                 // we are done with logout - First ask STS to cancel the token
                 AssertionType assertion = (AssertionType) httpSession.getAttribute(GeneralConstants.ASSERTION);
@@ -190,7 +187,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
                 try {
                     generateSuccessStatusResponseType(statusResponseType.getInResponseTo(), request, response, decodedRelayState);
 
-                    boolean isPost = isPostBindingForResponse(server, decodedRelayState, request);
+                    boolean isPost = isPostBindingForResponse(stack, decodedRelayState, request);
                     response.setPostBindingForResponse(isPost);
                 } catch (Exception e) {
                     throw logger.processingError(e);
@@ -207,9 +204,9 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
                 httpSession.invalidate(); // We are done with the logout interaction
             } else {
                 // Put the participant in transit mode
-                server.stack().registerTransitParticipant(sessionID, nextParticipant);
+                stack.registerTransitParticipant(sessionID, nextParticipant);
 
-                boolean isPost = isPostBindingForResponse(server, nextParticipant, request);
+                boolean isPost = isPostBindingForResponse(stack, nextParticipant, request);
                 response.setPostBindingForResponse(isPost);
 
                 // send logout request to participant with relaystate to orig
@@ -245,29 +242,26 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
                 SAML2Request saml2Request = new SAML2Request();
 
                 ServletContext servletCtx = httpContext.getServletContext();
-                IdentityServer server = (IdentityServer) servletCtx.getAttribute(GeneralConstants.IDENTITY_SERVER);
-
-                if (server == null)
-                    throw logger.samlHandlerIdentityServerNotFoundError();
+                IdentityParticipantStack stack = getIdentityParticipantStack(servletCtx, session);
 
                 String originalIssuer = (relayState == null) ? issuer : relayState;
 
-                String participant = this.getParticipant(server, sessionID, originalIssuer);
+                String participant = this.getParticipant(stack, sessionID, originalIssuer);
 
                 if (participant == null || participant.equals(originalIssuer)) {
                     // All log out is done
                     session.invalidate();
-                    server.stack().pop(sessionID);
+                    stack.pop(sessionID);
 
                     generateSuccessStatusResponseType(logOutRequest.getID(), request, response, originalIssuer);
 
-                    boolean isPost = isPostBindingForResponse(server, participant, request);
+                    boolean isPost = isPostBindingForResponse(stack, participant, request);
                     response.setPostBindingForResponse(isPost);
 
                     response.setSendRequest(false);
                 } else {
                     // Put the participant in transit mode
-                    server.stack().registerTransitParticipant(sessionID, participant);
+                    stack.registerTransitParticipant(sessionID, participant);
 
                     if (relayState == null)
                         relayState = originalIssuer;
@@ -277,7 +271,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
 
                     response.setDestination(participant);
 
-                    boolean isPost = isPostBindingForResponse(server, participant, request);
+                    boolean isPost = isPostBindingForResponse(stack, participant, request);
                     response.setPostBindingForResponse(isPost);
 
                     LogoutRequestType lort = saml2Request.createLogoutRequest(request.getIssuer().getValue());
@@ -340,14 +334,14 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             response.setDestination(originalIssuer);
         }
 
-        private String getParticipant(IdentityServer server, String sessionID, String originalRequestor) {
-            int participants = server.stack().getParticipants(sessionID);
+        private String getParticipant(IdentityParticipantStack stack, String sessionID, String originalRequestor) {
+            int participants = stack.getParticipants(sessionID);
 
             String participant = originalRequestor;
             // Get a participant who is not equal to the original issuer of the logout request
             if (participants > 0) {
                 do {
-                    participant = server.stack().pop(sessionID);
+                    participant = stack.pop(sessionID);
                     --participants;
                 } while (participants > 0 && participant.equals(originalRequestor));
             }
@@ -355,8 +349,8 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             return participant;
         }
 
-        private boolean isPostBindingForResponse(IdentityServer server, String participant, SAML2HandlerRequest request) {
-            Boolean isPostParticipant = server.stack().getBinding(participant);
+        private boolean isPostBindingForResponse(IdentityParticipantStack stack, String participant, SAML2HandlerRequest request) {
+            Boolean isPostParticipant = stack.getBinding(participant);
             if (isPostParticipant == null)
                 isPostParticipant = Boolean.TRUE;
 
@@ -366,6 +360,23 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
                 isStrictPostBindingForResponse = Boolean.FALSE;
 
             return isPostParticipant || isStrictPostBindingForResponse;
+        }
+
+        private IdentityParticipantStack getIdentityParticipantStack(ServletContext servletContext, HttpSession session) throws ProcessingException {
+            IdentityServer identityServer = (IdentityServer) servletContext.getAttribute(GeneralConstants.IDENTITY_SERVER);
+
+            if (identityServer == null) {
+                throw logger.samlHandlerIdentityServerNotFoundError();
+            }
+
+            IdentityParticipantStack stack = (IdentityParticipantStack) session.getAttribute(IdentityParticipantStack.class.getName());
+
+            if (stack == null) {
+                stack = identityServer.stack();
+                session.setAttribute(IdentityParticipantStack.class.getName(), stack);
+            }
+
+            return stack;
         }
     }
 

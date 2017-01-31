@@ -17,13 +17,15 @@
  */
 package org.picketlink.identity.federation.web.core;
 
+import java.io.Serializable;
+
 /**
  * A stack to register and deregister participants in the identity federation
  *
  * @author Anil.Saldhana@redhat.com
  * @since Feb 25, 2011
  */
-public interface IdentityParticipantStack {
+public interface IdentityParticipantStack extends Serializable {
 
     /**
      * Peek at the most recent participant in the session
