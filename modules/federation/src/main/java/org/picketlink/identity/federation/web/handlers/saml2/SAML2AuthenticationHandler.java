@@ -242,7 +242,7 @@ public class SAML2AuthenticationHandler extends BaseSAML2Handler {
                 Document samlResponse = this.getResponse(request);
 
                 // Update the Identity Server
-                boolean isPost = art.getProtocolBinding().toString().equals(JBossSAMLURIConstants.SAML_HTTP_POST_BINDING.get());
+                boolean isPost = httpContext.getRequest().getMethod().equalsIgnoreCase("POST");
                 IdentityParticipantStack stack = getIdentityParticipantStack(servletContext, session);
                 // We will try to find URL for global logout from SP metadata (if they are provided) and use SP logout URL
                 // for registration to IdentityServer
