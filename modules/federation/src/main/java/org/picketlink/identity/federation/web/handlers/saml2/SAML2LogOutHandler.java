@@ -497,12 +497,7 @@ public class SAML2LogOutHandler extends BaseSAML2Handler {
             // Status
             StatusType statusType = new StatusType();
             StatusCodeType statusCodeType = new StatusCodeType();
-            statusCodeType.setValue(URI.create(JBossSAMLURIConstants.STATUS_RESPONDER.get()));
-
-            // 2nd level status code
-            StatusCodeType status2ndLevel = new StatusCodeType();
-            status2ndLevel.setValue(URI.create(JBossSAMLURIConstants.STATUS_SUCCESS.get()));
-            statusCodeType.setStatusCode(status2ndLevel);
+            statusCodeType.setValue(URI.create(JBossSAMLURIConstants.STATUS_SUCCESS.get()));
 
             statusType.setStatusCode(statusCodeType);
 
