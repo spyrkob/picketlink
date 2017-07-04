@@ -35,7 +35,10 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Result;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
+import java.util.function.Supplier;
 
 /**
  * Utility class that deals with StAX
@@ -47,7 +50,12 @@ public class StaxUtil {
 
     private static final PicketLinkLogger logger = PicketLinkLoggerFactory.getLogger();
 
-    private static ThreadLocal<Stack<String>> registeredNSStack = new ThreadLocal<Stack<String>>();
+    static ThreadLocal<Stack<Set<String>>> namespaces = ThreadLocal.withInitial(new Supplier<Stack<Set<String>>>() {
+        @Override
+        public Stack<Set<String>> get() {
+            return new Stack<>();
+        }
+    });
 
     /**
      * Flush the stream writer
@@ -325,9 +333,6 @@ public class StaxUtil {
      * @throws ProcessingException
      */
     public static void writeDOMElement(XMLStreamWriter writer, Element domElement) throws ProcessingException {
-        if (registeredNSStack.get() == null) {
-            registeredNSStack.set(new Stack<String>());
-        }
         String domElementPrefix = domElement.getPrefix();
 
         if (domElementPrefix == null) {
@@ -342,9 +347,8 @@ public class StaxUtil {
         writeStartElement(writer, domElementPrefix, domElement.getLocalName(), domElementNS);
 
         // Should we register namespace
-        if (domElementPrefix != "" && !registeredNSStack.get().contains(domElementNS)) {
-            // writeNameSpace(writer, domElementPrefix, domElementNS );
-            registeredNSStack.get().push(domElementNS);
+        if (domElementPrefix != "" && !namespaces.get().peek().contains(domElementNS)) {
+            writeNameSpace(writer, domElementPrefix, domElementNS );
         } else if (domElementPrefix == "" && domElementNS != null) {
             writeNameSpace(writer, "xmlns", domElementNS);
         }
@@ -363,7 +367,9 @@ public class StaxUtil {
                 }
             } else {
                 if ("xmlns".equals(attributePrefix)) {
-                    writeNameSpace(writer, attribLocalName, attribValue);
+                    if (!namespaces.get().peek().contains(attribValue)) {
+                        writeNameSpace(writer, attribLocalName, attribValue);
+                    }
                 } else {
                     writeAttribute(writer, new QName(attr.getNamespaceURI(), attribLocalName, attributePrefix), attribValue);
                 }
@@ -388,6 +394,7 @@ public class StaxUtil {
      */
     public static void writeNameSpace(XMLStreamWriter writer, String prefix, String ns) throws ProcessingException {
         try {
+            namespaces.get().peek().add(ns);
             writer.writeNamespace(prefix, ns);
         } catch (XMLStreamException e) {
             throw logger.processingError(e);
@@ -407,6 +414,12 @@ public class StaxUtil {
     public static void writeStartElement(XMLStreamWriter writer, String prefix, String localPart, String ns)
             throws ProcessingException {
         try {
+            if (namespaces.get().empty()) {
+                namespaces.get().push(new HashSet<>());
+            } else {
+                namespaces.get().push(new HashSet<>(namespaces.get().peek()));
+            }
+
             writer.writeStartElement(prefix, localPart, ns);
         } catch (XMLStreamException e) {
             throw logger.processingError(e);
@@ -424,6 +437,8 @@ public class StaxUtil {
     public static void writeEndElement(XMLStreamWriter writer) throws ProcessingException {
         try {
             writer.writeEndElement();
+
+            namespaces.get().pop();
         } catch (XMLStreamException e) {
             throw logger.processingError(e);
         }
