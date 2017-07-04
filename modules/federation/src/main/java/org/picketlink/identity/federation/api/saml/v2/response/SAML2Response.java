@@ -465,6 +465,11 @@ public class SAML2Response {
             throw logger.nullArgumentError("InputStream");
 
         Document samlResponseDocument = DocumentUtil.getDocument(is);
+        try {
+            samlResponseDocument = new XmlNamespaceNormalizer().normalizeNS(samlResponseDocument);
+        } catch (Exception e) {
+            logger.parserError(e);
+        }
 
         if (logger.isTraceEnabled()) {
             logger.trace("SAML Response Document: " + DocumentUtil.asString(samlResponseDocument));
